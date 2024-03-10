@@ -1,45 +1,279 @@
-<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/images/icons/icon.jpg?v=2.6.2" type="image/png" sizes="16x16"><link rel="icon" href="/images/icons/icon.jpg?v=2.6.2" type="image/png" sizes="32x32"><meta name="description" content="1.什么是pipeline       Pipeline是Redis提供的一种批量请求机制，可以在client端对多条命令进行打包，然后一次性发送给服务器，避免了多次网络往返的开销。                     2.pipeline的优势       为了解释pipeline的作用，我们先思考一个问题: 如果客户端需要依次执行多条Redis命令，该如何处理？">
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/images/icons/icon.jpg">
+  <link rel="icon" href="/images/icons/icon.jpg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="看热闹的咸鱼">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="1.什么是pipelinePipeline是Redis提供的一种批量请求机制，可以在client端对多条命令进行打包，然后一次性发送给服务器，避免了多次网络往返的开销。 2.pipeline的优势为了解释pipeline的作用，我们先思考一个问题: 如果客户端需要依次执行多条Redis命令，该如何处理？">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Redis Pipeline管道技术">
 <meta property="og:url" content="https://blog.supersource.top/2023/08/06/Redis-Pipeline%E7%AE%A1%E9%81%93%E6%8A%80%E6%9C%AF/index.html">
 <meta property="og:site_name" content="每个人都有需要安静的时候">
-<meta property="og:description" content="1.什么是pipeline       Pipeline是Redis提供的一种批量请求机制，可以在client端对多条命令进行打包，然后一次性发送给服务器，避免了多次网络往返的开销。                     2.pipeline的优势       为了解释pipeline的作用，我们先思考一个问题: 如果客户端需要依次执行多条Redis命令，该如何处理？">
+<meta property="og:description" content="1.什么是pipelinePipeline是Redis提供的一种批量请求机制，可以在client端对多条命令进行打包，然后一次性发送给服务器，避免了多次网络往返的开销。 2.pipeline的优势为了解释pipeline的作用，我们先思考一个问题: 如果客户端需要依次执行多条Redis命令，该如何处理？">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2023-08-06T09:04:46.000Z">
 <meta property="article:modified_time" content="2023-08-06T09:08:27.751Z">
 <meta property="article:author" content="看热闹的咸鱼">
-<meta name="twitter:card" content="summary"><title>Redis Pipeline管道技术 | 每个人都有需要安静的时候</title><link ref="canonical" href="https://blog.supersource.top/2023/08/06/Redis-Pipeline%E7%AE%A1%E9%81%93%E6%8A%80%E6%9C%AF/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.6.2"><script>var Stun = window.Stun || {};
-var CONFIG = {
-  root: '/',
-  algolia: undefined,
-  assistSearch: undefined,
-  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
-  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
-  header: {"enable":true,"showOnPost":true,"scrollDownIcon":false},
-  postWidget: {"endText":true},
-  nightMode: {"enable":true},
-  back2top: {"enable":true},
-  codeblock: {"style":"default","highlight":"light","wordWrap":false},
-  reward: false,
-  fancybox: false,
-  zoomImage: {"gapAside":"20px"},
-  galleryWaterfall: undefined,
-  lazyload: false,
-  pjax: undefined,
-  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
-  shortcuts: undefined,
-  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
-  sourcePath: {"js":"js","css":"css","images":"images"},
-};
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>Redis Pipeline管道技术 - 每个人都有需要安静的时候</title>
 
-window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 5.4.2"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner"><nav class="header-nav header-nav--fixed"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav><div class="header-banner"><div class="header-banner-info"><div class="header-banner-info__title">每个人都有需要安静的时候</div><div class="header-banner-info__subtitle"></div></div></div></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">Redis Pipeline管道技术</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2023-08-06</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2023-08-06</span></span></div></header><div class="post-body">
-        <h3 id="1-什么是pipeline"   >
-          <a href="#1-什么是pipeline" class="heading-link"><i class="fas fa-link"></i></a><a href="#1-什么是pipeline" class="headerlink" title="1.什么是pipeline"></a>1.什么是pipeline</h3>
-      <p><code>Pipeline</code>是<code>Redis</code>提供的一种批量请求机制，可以在client端对多条命令进行打包，然后一次性发送给服务器，避免了多次网络往返的开销。</p>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
-        <h3 id="2-pipeline的优势"   >
-          <a href="#2-pipeline的优势" class="heading-link"><i class="fas fa-link"></i></a><a href="#2-pipeline的优势" class="headerlink" title="2.pipeline的优势"></a>2.pipeline的优势</h3>
-      <p>为了解释<code>pipeline</code>的作用，我们先思考一个问题:</p>
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"blog.supersource.top","root":"/","version":"1.9.7","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 5.4.2"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>SS</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/banner1.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Redis Pipeline管道技术"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2023-08-06 17:04" pubdate>
+          2023年8月6日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          856 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          8 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">Redis Pipeline管道技术</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h3 id="1-什么是pipeline"><a href="#1-什么是pipeline" class="headerlink" title="1.什么是pipeline"></a>1.什么是pipeline</h3><p><code>Pipeline</code>是<code>Redis</code>提供的一种批量请求机制，可以在client端对多条命令进行打包，然后一次性发送给服务器，避免了多次网络往返的开销。</p>
+<h3 id="2-pipeline的优势"><a href="#2-pipeline的优势" class="headerlink" title="2.pipeline的优势"></a>2.pipeline的优势</h3><p>为了解释<code>pipeline</code>的作用，我们先思考一个问题:</p>
 <p>如果客户端需要依次执行多条<code>Redis</code>命令，该如何处理？</p>
 <span id="more"></span>
 
@@ -49,10 +283,7 @@ window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 5.4.2"></he
 </ul>
 <p>很明显第二种方式可以显著减少客户端与服务端的网络往返次数。</p>
 <p>这也就是Pipeline带来的优势，可以在client端实现命令缓冲和打包，从而极大地减少客户端和服务端间的往返次数和等待时间。</p>
-
-        <h3 id="3-pipeline工作原理"   >
-          <a href="#3-pipeline工作原理" class="heading-link"><i class="fas fa-link"></i></a><a href="#3-pipeline工作原理" class="headerlink" title="3.pipeline工作原理"></a>3.pipeline工作原理</h3>
-      <p>要理解<code>pipeline</code>的原理，我们首先需要了解Redis服务端处理命令的流程:</p>
+<h3 id="3-pipeline工作原理"><a href="#3-pipeline工作原理" class="headerlink" title="3.pipeline工作原理"></a>3.pipeline工作原理</h3><p>要理解<code>pipeline</code>的原理，我们首先需要了解Redis服务端处理命令的流程:</p>
 <ol>
 <li>客户端通过网络TCP连接发送命令到服务端</li>
 <li>服务器解析命令，并从客户端读取全部参数</li>
@@ -69,22 +300,16 @@ window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 5.4.2"></he
 </ol>
 <p>所以实际上服务端处理流程并无不同，改变主要是客户端如何打包和发送命令。服务端仍按正常方式依次执行。</p>
 <p>这样就相当于消除了服务端处理每个命令间的客户端网络往返等待时间。</p>
-
-        <h3 id="4-pipeline实现方法"   >
-          <a href="#4-pipeline实现方法" class="heading-link"><i class="fas fa-link"></i></a><a href="#4-pipeline实现方法" class="headerlink" title="4.pipeline实现方法"></a>4.pipeline实现方法</h3>
-      <p>Redis提供了多种语言的客户端，均支持了<code>pipeline</code>功能，使用方法类似:</p>
+<h3 id="4-pipeline实现方法"><a href="#4-pipeline实现方法" class="headerlink" title="4.pipeline实现方法"></a>4.pipeline实现方法</h3><p>Redis提供了多种语言的客户端，均支持了<code>pipeline</code>功能，使用方法类似:</p>
 <ol>
 <li>启动一个<code>pipeline</code>批量操作环境</li>
 <li>将需要发送的命令添加到<code>pipeline</code>队列中缓冲</li>
 <li>最后触发批量执行，并读取所有的响应<br>例如在Python中:</li>
 </ol>
-<figure class="highlight python"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> redis</span><br><span class="line"></span><br><span class="line">conn = redis.Redis(host=<span class="string">&#x27;127.0.0.1&#x27;</span>, port=<span class="number">6379</span>)</span><br><span class="line">pipe = conn.pipeline()</span><br><span class="line"></span><br><span class="line">pipe.<span class="built_in">set</span>(<span class="string">&#x27;foo&#x27;</span>, <span class="string">&#x27;bar&#x27;</span>)</span><br><span class="line">pipe.get(<span class="string">&#x27;foo&#x27;</span>)</span><br><span class="line">pipe.incr(<span class="string">&#x27;counter&#x27;</span>)</span><br><span class="line">pipe.hset(<span class="string">&#x27;hash&#x27;</span>, <span class="string">&#x27;k1&#x27;</span>, <span class="string">&#x27;v1&#x27;</span>)</span><br><span class="line"></span><br><span class="line">result = pipe.execute()</span><br><span class="line"><span class="built_in">print</span>(result)</span><br></pre></td></tr></table></div></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> redis<br><br>conn = redis.Redis(host=<span class="hljs-string">&#x27;127.0.0.1&#x27;</span>, port=<span class="hljs-number">6379</span>)<br>pipe = conn.pipeline()<br><br>pipe.<span class="hljs-built_in">set</span>(<span class="hljs-string">&#x27;foo&#x27;</span>, <span class="hljs-string">&#x27;bar&#x27;</span>)<br>pipe.get(<span class="hljs-string">&#x27;foo&#x27;</span>)<br>pipe.incr(<span class="hljs-string">&#x27;counter&#x27;</span>)<br>pipe.hset(<span class="hljs-string">&#x27;hash&#x27;</span>, <span class="hljs-string">&#x27;k1&#x27;</span>, <span class="hljs-string">&#x27;v1&#x27;</span>)<br><br>result = pipe.execute()<br><span class="hljs-built_in">print</span>(result)<br></code></pre></td></tr></table></figure>
 
 <p>其他语言的实现方式类似，底层均是向服务端发送缓冲的命令并按顺序读取回复。</p>
-
-        <h3 id="5-pipeline的注意事项"   >
-          <a href="#5-pipeline的注意事项" class="heading-link"><i class="fas fa-link"></i></a><a href="#5-pipeline的注意事项" class="headerlink" title="5.pipeline的注意事项"></a>5.pipeline的注意事项</h3>
-      <p>使用<code>pipeline</code>时有一些需要注意的问题:</p>
+<h3 id="5-pipeline的注意事项"><a href="#5-pipeline的注意事项" class="headerlink" title="5.pipeline的注意事项"></a>5.pipeline的注意事项</h3><p>使用<code>pipeline</code>时有一些需要注意的问题:</p>
 <ol>
 <li><code>pipeline</code>命令不保证原子性，中间命令可能会被其他客户端更改。</li>
 <li><code>pipeline</code>本身不是一次<code>Redis</code>事务，每个命令可独立失败或成功。</li>
@@ -94,16 +319,380 @@ window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 5.4.2"></he
 <li>避免在<code>pipeline</code>内部包含高延迟命令，可能会阻塞整个队列。</li>
 </ol>
 <p><code>pipeline</code>是一个非常强大的优化<code>Redis</code>网络访问的工具，但也需要注意上述问题，来确保其可靠和高效地运行。</p>
-
-        <h4 id="参考资料"   >
-          <a href="#参考资料" class="heading-link"><i class="fas fa-link"></i></a><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h4>
-      <ul>
-<li><span class="exturl"><a class="exturl__link"   target="_blank" rel="noopener" href="https://redis.io/docs/manual/pipelining/" >Redis pipelining</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></li>
+<h4 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h4><ul>
+<li><a target="_blank" rel="noopener" href="https://redis.io/docs/manual/pipelining/">Redis pipelining</a></li>
 </ul>
-</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="https://blog.supersource.top">看热闹的咸鱼</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="https://blog.supersource.top/2023/08/06/Redis-Pipeline%E7%AE%A1%E9%81%93%E6%8A%80%E6%9C%AF/">https://blog.supersource.top/2023/08/06/Redis-Pipeline%E7%AE%A1%E9%81%93%E6%8A%80%E6%9C%AF/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2023/09/17/%E5%9C%A8MySQL%E7%9A%84PREPARE%E4%B8%AD%E7%BB%91%E5%AE%9AWHERE-IN%E5%AD%90%E5%8F%A5%E5%8F%82%E6%95%B0/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">在MySQL的PREPARE中绑定WHERE IN子句参数</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2023/07/30/MySQL%E4%BD%BF%E7%94%A8binlog%E6%81%A2%E5%A4%8D%E6%95%B0%E6%8D%AE/"><span class="paginator-prev__text">MySQL使用binlog恢复数据</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E4%BB%80%E4%B9%88%E6%98%AFpipeline"><span class="toc-number">1.</span> <span class="toc-text">
-          1.什么是pipeline</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-pipeline%E7%9A%84%E4%BC%98%E5%8A%BF"><span class="toc-number">2.</span> <span class="toc-text">
-          2.pipeline的优势</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-pipeline%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="toc-number">3.</span> <span class="toc-text">
-          3.pipeline工作原理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-pipeline%E5%AE%9E%E7%8E%B0%E6%96%B9%E6%B3%95"><span class="toc-number">4.</span> <span class="toc-text">
-          4.pipeline实现方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-pipeline%E7%9A%84%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="toc-number">5.</span> <span class="toc-text">
-          5.pipeline的注意事项</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="toc-number">5.1.</span> <span class="toc-text">
-          参考资料</span></a></li></ol></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/images/icons/stun-logo.svg" alt="avatar"></div><p class="sidebar-ov-author__text">做人最重要开心</p></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">11</div><div class="sidebar-ov-state-item__name">归档</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span><span class="sidebar-reading-info__perc">%</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2024</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>看热闹的咸鱼</span></div><div><span>由 <a href="http://hexo.io/" title="Hexo" target="_blank" rel="noopener">Hexo</a> 强力驱动</span><span> v5.4.2</span><span class="footer__devider">|</span><span>主题 - <a href="https://github.com/liuyib/hexo-theme-stun/" title="Stun" target="_blank" rel="noopener">Stun</a></span><span> v2.6.2</span></div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="/js/utils.js?v=2.6.2"></script><script src="/js/stun-boot.js?v=2.6.2"></script><script src="/js/scroll.js?v=2.6.2"></script><script src="/js/header.js?v=2.6.2"></script><script src="/js/sidebar.js?v=2.6.2"></script></body></html>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Redis Pipeline管道技术</div>
+      <div>https://blog.supersource.top/2023/08/06/Redis-Pipeline管道技术/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>看热闹的咸鱼</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2023年8月6日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2023/09/17/%E5%9C%A8MySQL%E7%9A%84PREPARE%E4%B8%AD%E7%BB%91%E5%AE%9AWHERE-IN%E5%AD%90%E5%8F%A5%E5%8F%82%E6%95%B0/" title="在MySQL的PREPARE中绑定WHERE IN子句参数">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">在MySQL的PREPARE中绑定WHERE IN子句参数</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2023/07/30/MySQL%E4%BD%BF%E7%94%A8binlog%E6%81%A2%E5%A4%8D%E6%95%B0%E6%8D%AE/" title="MySQL使用binlog恢复数据">
+                        <span class="hidden-mobile">MySQL使用binlog恢复数据</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  
+  
+    <article id="comments" lazyload>
+      
+  <div id="waline"></div>
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#waline', function() {
+      Fluid.utils.createCssLink('https://cdn.staticfile.org/waline/2.15.5/waline.min.css')
+      Fluid.utils.createScript('https://cdn.staticfile.org/waline/2.15.5/waline.min.js', function() {
+        var options = Object.assign(
+          {"serverURL":"https://889kzdux.api.lncldglobal.com","path":"window.location.pathname","meta":["nick","mail","link"],"requiredMeta":["nick"],"lang":"zh-CN","emoji":["https://cdn.jsdelivr.net/gh/walinejs/emojis/weibo"],"dark":"html[data-user-color-scheme=\"dark\"]","wordLimit":0,"pageSize":10},
+          {
+            el: '#waline',
+            path: window.location.pathname
+          }
+        )
+        Waline.init(options);
+        Fluid.utils.waitElementVisible('#waline .vcontent', () => {
+          var imgSelector = '#waline .vcontent img:not(.vemoji)';
+          Fluid.plugins.imageCaption(imgSelector);
+          Fluid.plugins.fancyBox(imgSelector);
+        })
+      });
+    });
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+    </article>
+  
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

@@ -1,44 +1,278 @@
-<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/images/icons/icon.jpg?v=2.6.2" type="image/png" sizes="16x16"><link rel="icon" href="/images/icons/icon.jpg?v=2.6.2" type="image/png" sizes="32x32"><meta name="description" content="在MySQL的PREPARE中绑定WHERE IN子句参数                           1. PREPARE简介         在 MySQL 中，PREPARE 是一种用于准备执行动态 SQL 语句的机制。通过 PREPARE，你可以将一个 SQL 查询或操作的查询计划（执行计划）准备好，然后在稍后的时间点执行它，而不是立即执行。这带来了以下好处：">
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/images/icons/icon.jpg">
+  <link rel="icon" href="/images/icons/icon.jpg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="看热闹的咸鱼">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="在MySQL的PREPARE中绑定WHERE IN子句参数1. PREPARE简介  在 MySQL 中，PREPARE 是一种用于准备执行动态 SQL 语句的机制。通过 PREPARE，你可以将一个 SQL 查询或操作的查询计划（执行计划）准备好，然后在稍后的时间点执行它，而不是立即执行。这带来了以下好处：  SQL 注入防护： 使用 PREPARE 可以在准备 SQL 语句时进行参数绑定，从而">
 <meta property="og:type" content="article">
 <meta property="og:title" content="在MySQL的PREPARE中绑定WHERE IN子句参数">
 <meta property="og:url" content="https://blog.supersource.top/2023/09/17/%E5%9C%A8MySQL%E7%9A%84PREPARE%E4%B8%AD%E7%BB%91%E5%AE%9AWHERE-IN%E5%AD%90%E5%8F%A5%E5%8F%82%E6%95%B0/index.html">
 <meta property="og:site_name" content="每个人都有需要安静的时候">
-<meta property="og:description" content="在MySQL的PREPARE中绑定WHERE IN子句参数                           1. PREPARE简介         在 MySQL 中，PREPARE 是一种用于准备执行动态 SQL 语句的机制。通过 PREPARE，你可以将一个 SQL 查询或操作的查询计划（执行计划）准备好，然后在稍后的时间点执行它，而不是立即执行。这带来了以下好处：">
+<meta property="og:description" content="在MySQL的PREPARE中绑定WHERE IN子句参数1. PREPARE简介  在 MySQL 中，PREPARE 是一种用于准备执行动态 SQL 语句的机制。通过 PREPARE，你可以将一个 SQL 查询或操作的查询计划（执行计划）准备好，然后在稍后的时间点执行它，而不是立即执行。这带来了以下好处：  SQL 注入防护： 使用 PREPARE 可以在准备 SQL 语句时进行参数绑定，从而">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2023-09-17T15:27:07.000Z">
 <meta property="article:modified_time" content="2023-09-17T15:28:12.293Z">
 <meta property="article:author" content="看热闹的咸鱼">
-<meta name="twitter:card" content="summary"><title>在MySQL的PREPARE中绑定WHERE IN子句参数 | 每个人都有需要安静的时候</title><link ref="canonical" href="https://blog.supersource.top/2023/09/17/%E5%9C%A8MySQL%E7%9A%84PREPARE%E4%B8%AD%E7%BB%91%E5%AE%9AWHERE-IN%E5%AD%90%E5%8F%A5%E5%8F%82%E6%95%B0/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.6.2"><script>var Stun = window.Stun || {};
-var CONFIG = {
-  root: '/',
-  algolia: undefined,
-  assistSearch: undefined,
-  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
-  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
-  header: {"enable":true,"showOnPost":true,"scrollDownIcon":false},
-  postWidget: {"endText":true},
-  nightMode: {"enable":true},
-  back2top: {"enable":true},
-  codeblock: {"style":"default","highlight":"light","wordWrap":false},
-  reward: false,
-  fancybox: false,
-  zoomImage: {"gapAside":"20px"},
-  galleryWaterfall: undefined,
-  lazyload: false,
-  pjax: undefined,
-  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
-  shortcuts: undefined,
-  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
-  sourcePath: {"js":"js","css":"css","images":"images"},
-};
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>在MySQL的PREPARE中绑定WHERE IN子句参数 - 每个人都有需要安静的时候</title>
 
-window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 5.4.2"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner"><nav class="header-nav header-nav--fixed"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav><div class="header-banner"><div class="header-banner-info"><div class="header-banner-info__title">每个人都有需要安静的时候</div><div class="header-banner-info__subtitle"></div></div></div></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">在MySQL的PREPARE中绑定WHERE IN子句参数</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2023-09-17</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2023-09-17</span></span></div></header><div class="post-body">
-        <h3 id="在MySQL的PREPARE中绑定WHERE-IN子句参数"   >
-          <a href="#在MySQL的PREPARE中绑定WHERE-IN子句参数" class="heading-link"><i class="fas fa-link"></i></a><a href="#在MySQL的PREPARE中绑定WHERE-IN子句参数" class="headerlink" title="在MySQL的PREPARE中绑定WHERE IN子句参数"></a>在MySQL的PREPARE中绑定WHERE IN子句参数</h3>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"blog.supersource.top","root":"/","version":"1.9.7","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 5.4.2"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>SS</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/banner1.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="在MySQL的PREPARE中绑定WHERE IN子句参数"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2023-09-17 23:27" pubdate>
+          2023年9月17日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          795 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          7 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
       
-        <h4 id="1-PREPARE简介"   >
-          <a href="#1-PREPARE简介" class="heading-link"><i class="fas fa-link"></i></a><a href="#1-PREPARE简介" class="headerlink" title="1. PREPARE简介"></a>1. PREPARE简介</h4>
-      <p>  在 MySQL 中，PREPARE 是一种用于准备执行动态 SQL 语句的机制。通过 PREPARE，你可以将一个 SQL 查询或操作的查询计划（执行计划）准备好，然后在稍后的时间点执行它，而不是立即执行。这带来了以下好处：</p>
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">在MySQL的PREPARE中绑定WHERE IN子句参数</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h3 id="在MySQL的PREPARE中绑定WHERE-IN子句参数"><a href="#在MySQL的PREPARE中绑定WHERE-IN子句参数" class="headerlink" title="在MySQL的PREPARE中绑定WHERE IN子句参数"></a>在MySQL的PREPARE中绑定WHERE IN子句参数</h3><h4 id="1-PREPARE简介"><a href="#1-PREPARE简介" class="headerlink" title="1. PREPARE简介"></a>1. PREPARE简介</h4><p>  在 MySQL 中，PREPARE 是一种用于准备执行动态 SQL 语句的机制。通过 PREPARE，你可以将一个 SQL 查询或操作的查询计划（执行计划）准备好，然后在稍后的时间点执行它，而不是立即执行。这带来了以下好处：</p>
 <ol>
 <li>SQL 注入防护： 使用 PREPARE 可以在准备 SQL 语句时进行参数绑定，从而防止 SQL 注入攻击。因为动态构建 SQL 查询字符串并将参数直接插入字符串是一种不安全的做法，而 PREPARE 允许你将参数作为占位符传递，从而提高了安全性。</li>
 <li>性能优化： 通过预编译 SQL 语句，数据库管理系统可以在执行之前进行一些优化工作，如查询计划的生成和缓存。这可以提高查询的性能，特别是当同一条 SQL 语句需要多次执行时。</li>
@@ -47,10 +281,7 @@ window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 5.4.2"></he
 </ol>
 <span id="more"></span>
 
-
-        <h4 id="2-PREPARE使用"   >
-          <a href="#2-PREPARE使用" class="heading-link"><i class="fas fa-link"></i></a><a href="#2-PREPARE使用" class="headerlink" title="2. PREPARE使用"></a>2. PREPARE使用</h4>
-      <p>下面是使用 PREPARE 和 EXECUTE 的一般步骤：</p>
+<h4 id="2-PREPARE使用"><a href="#2-PREPARE使用" class="headerlink" title="2. PREPARE使用"></a>2. PREPARE使用</h4><p>下面是使用 PREPARE 和 EXECUTE 的一般步骤：</p>
 <ol>
 <li>使用 PREPARE 准备 SQL 语句，并将其分配给一个变量或标识符。</li>
 <li>使用 EXECUTE 执行预编译的 SQL 语句，传递参数（如果有的话）。</li>
@@ -58,37 +289,389 @@ window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 5.4.2"></he
 <li>使用 DEALLOCATE 或 CLOSE 来释放已经准备的语句，以释放资源。</li>
 </ol>
 <p>总的来说，PREPARE 的主要好处在于提高了安全性、性能和代码的可维护性。但是，它并不是在所有情况下都有益的，因此应谨慎使用，特别是对于只执行一次的查询。</p>
+<h4 id="3-示例"><a href="#3-示例" class="headerlink" title="3. 示例"></a>3. 示例</h4><p>以下是一个使用<code>PREPARE</code>语句的示例，演示了如何查询一个名为<code>employees</code>的表：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-comment">-- 准备查询</span><br><span class="hljs-keyword">PREPARE</span> stmt <span class="hljs-keyword">FROM</span> <span class="hljs-string">&#x27;SELECT * FROM employees WHERE department = ?&#x27;</span>;<br><br><span class="hljs-comment">-- 绑定参数</span><br><span class="hljs-keyword">SET</span> <span class="hljs-variable">@department</span> <span class="hljs-operator">=</span> <span class="hljs-string">&#x27;Sales&#x27;</span>;<br><br><span class="hljs-comment">-- 执行查询</span><br><span class="hljs-keyword">EXECUTE</span> stmt <span class="hljs-keyword">USING</span> <span class="hljs-variable">@department</span>;<br><br><span class="hljs-comment">-- 关闭和清理</span><br><span class="hljs-keyword">DEALLOCATE</span> <span class="hljs-keyword">PREPARE</span> stmt;<br></code></pre></td></tr></table></figure>
 
-        <h4 id="3-示例"   >
-          <a href="#3-示例" class="heading-link"><i class="fas fa-link"></i></a><a href="#3-示例" class="headerlink" title="3. 示例"></a>3. 示例</h4>
-      <p>以下是一个使用<code>PREPARE</code>语句的示例，演示了如何查询一个名为<code>employees</code>的表：</p>
-<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 准备查询</span></span><br><span class="line"><span class="keyword">PREPARE</span> stmt <span class="keyword">FROM</span> <span class="string">&#x27;SELECT * FROM employees WHERE department = ?&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 绑定参数</span></span><br><span class="line"><span class="keyword">SET</span> <span class="variable">@department</span> <span class="operator">=</span> <span class="string">&#x27;Sales&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 执行查询</span></span><br><span class="line"><span class="keyword">EXECUTE</span> stmt <span class="keyword">USING</span> <span class="variable">@department</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 关闭和清理</span></span><br><span class="line"><span class="keyword">DEALLOCATE</span> <span class="keyword">PREPARE</span> stmt;</span><br></pre></td></tr></table></div></figure>
-
-
-        <h4 id="4-使用PREPARE做IN查询"   >
-          <a href="#4-使用PREPARE做IN查询" class="heading-link"><i class="fas fa-link"></i></a><a href="#4-使用PREPARE做IN查询" class="headerlink" title="4. 使用PREPARE做IN查询"></a>4. 使用PREPARE做IN查询</h4>
-      <p>当一条语句中，有<code>WHERE IN</code>这样的结构时，直接使用<code>PREPARE</code>并不会起到正确的结果，例如下面这条语句：</p>
-<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">prepare</span> myFun <span class="keyword">from</span> <span class="string">&#x27;select * from user where id IN (?)&#x27;</span>;</span><br><span class="line"><span class="keyword">set</span> <span class="variable">@str</span><span class="operator">=</span><span class="string">&#x27;1,2&#x27;</span>;</span><br><span class="line"><span class="keyword">execute</span> myFun <span class="keyword">using</span> <span class="variable">@str</span>;</span><br></pre></td></tr></table></div></figure>
+<h4 id="4-使用PREPARE做IN查询"><a href="#4-使用PREPARE做IN查询" class="headerlink" title="4. 使用PREPARE做IN查询"></a>4. 使用PREPARE做IN查询</h4><p>当一条语句中，有<code>WHERE IN</code>这样的结构时，直接使用<code>PREPARE</code>并不会起到正确的结果，例如下面这条语句：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">prepare</span> myFun <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;select * from user where id IN (?)&#x27;</span>;<br><span class="hljs-keyword">set</span> <span class="hljs-variable">@str</span><span class="hljs-operator">=</span><span class="hljs-string">&#x27;1,2&#x27;</span>;<br><span class="hljs-keyword">execute</span> myFun <span class="hljs-keyword">using</span> <span class="hljs-variable">@str</span>;<br></code></pre></td></tr></table></figure>
 
 <p>预期效果是查询出<code>id=1</code>和<code>id=2</code>两条数据，而实现上只能查出<code>id=1</code>的数据。</p>
 <p>这时候我们可以用<code>FIND_IN_SET</code>函数来解决这个问题：</p>
-<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">prepare</span> myFun <span class="keyword">from</span> <span class="string">&#x27;select * from user where FIND_IN_SET(id, ?)&#x27;</span>;</span><br><span class="line"><span class="keyword">set</span> <span class="variable">@str</span><span class="operator">=</span><span class="string">&#x27;1,2&#x27;</span>;</span><br><span class="line"><span class="keyword">execute</span> myFun <span class="keyword">using</span> <span class="variable">@str</span>;</span><br></pre></td></tr></table></div></figure>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">prepare</span> myFun <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;select * from user where FIND_IN_SET(id, ?)&#x27;</span>;<br><span class="hljs-keyword">set</span> <span class="hljs-variable">@str</span><span class="hljs-operator">=</span><span class="hljs-string">&#x27;1,2&#x27;</span>;<br><span class="hljs-keyword">execute</span> myFun <span class="hljs-keyword">using</span> <span class="hljs-variable">@str</span>;<br></code></pre></td></tr></table></figure>
 
 <p>这样出来的结果就是<code>id=1</code>和<code>id=2</code>了。</p>
 <p><code>FIND_IN_SET</code>是一个 MySQL 数据库函数，语法如下：</p>
-<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">FIND_IN_SET(search_value, comma_separated_list)</span><br></pre></td></tr></table></div></figure>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">FIND_IN_SET(search_value, comma_separated_list)<br></code></pre></td></tr></table></figure>
 
-
-        <h4 id="参考资料"   >
-          <a href="#参考资料" class="heading-link"><i class="fas fa-link"></i></a><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h4>
-      <ul>
-<li><span class="exturl"><a class="exturl__link"   target="_blank" rel="noopener" href="https://deepinout.com/mysql/mysql-questions/261_mysql_binding_parameters_for_where_in_clause_with_pdo.html" >MySQL PDO绑定WHERE IN子句参数</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></li>
-<li><span class="exturl"><a class="exturl__link"   target="_blank" rel="noopener" href="https://blog.csdn.net/Saintmm/article/details/125945979" >MySQL如何对SQL做prepare预处理（解决IN查询SQL预处理仅能查询出一条记录的问题）</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></li>
+<h4 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h4><ul>
+<li><a target="_blank" rel="noopener" href="https://deepinout.com/mysql/mysql-questions/261_mysql_binding_parameters_for_where_in_clause_with_pdo.html">MySQL PDO绑定WHERE IN子句参数</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/Saintmm/article/details/125945979">MySQL如何对SQL做prepare预处理（解决IN查询SQL预处理仅能查询出一条记录的问题）</a></li>
 </ul>
-</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="https://blog.supersource.top">看热闹的咸鱼</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="https://blog.supersource.top/2023/09/17/%E5%9C%A8MySQL%E7%9A%84PREPARE%E4%B8%AD%E7%BB%91%E5%AE%9AWHERE-IN%E5%AD%90%E5%8F%A5%E5%8F%82%E6%95%B0/">https://blog.supersource.top/2023/09/17/%E5%9C%A8MySQL%E7%9A%84PREPARE%E4%B8%AD%E7%BB%91%E5%AE%9AWHERE-IN%E5%AD%90%E5%8F%A5%E5%8F%82%E6%95%B0/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><nav class="post-paginator paginator"><div class="paginator-next"><a class="paginator-next__link" href="/2023/08/06/Redis-Pipeline%E7%AE%A1%E9%81%93%E6%8A%80%E6%9C%AF/"><span class="paginator-prev__text">Redis Pipeline管道技术</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9C%A8MySQL%E7%9A%84PREPARE%E4%B8%AD%E7%BB%91%E5%AE%9AWHERE-IN%E5%AD%90%E5%8F%A5%E5%8F%82%E6%95%B0"><span class="toc-number">1.</span> <span class="toc-text">
-          在MySQL的PREPARE中绑定WHERE IN子句参数</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-PREPARE%E7%AE%80%E4%BB%8B"><span class="toc-number">1.1.</span> <span class="toc-text">
-          1. PREPARE简介</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-PREPARE%E4%BD%BF%E7%94%A8"><span class="toc-number">1.2.</span> <span class="toc-text">
-          2. PREPARE使用</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-%E7%A4%BA%E4%BE%8B"><span class="toc-number">1.3.</span> <span class="toc-text">
-          3. 示例</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-%E4%BD%BF%E7%94%A8PREPARE%E5%81%9AIN%E6%9F%A5%E8%AF%A2"><span class="toc-number">1.4.</span> <span class="toc-text">
-          4. 使用PREPARE做IN查询</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="toc-number">1.5.</span> <span class="toc-text">
-          参考资料</span></a></li></ol></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/images/icons/stun-logo.svg" alt="avatar"></div><p class="sidebar-ov-author__text">做人最重要开心</p></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">11</div><div class="sidebar-ov-state-item__name">归档</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span><span class="sidebar-reading-info__perc">%</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2024</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>看热闹的咸鱼</span></div><div><span>由 <a href="http://hexo.io/" title="Hexo" target="_blank" rel="noopener">Hexo</a> 强力驱动</span><span> v5.4.2</span><span class="footer__devider">|</span><span>主题 - <a href="https://github.com/liuyib/hexo-theme-stun/" title="Stun" target="_blank" rel="noopener">Stun</a></span><span> v2.6.2</span></div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="/js/utils.js?v=2.6.2"></script><script src="/js/stun-boot.js?v=2.6.2"></script><script src="/js/scroll.js?v=2.6.2"></script><script src="/js/header.js?v=2.6.2"></script><script src="/js/sidebar.js?v=2.6.2"></script></body></html>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>在MySQL的PREPARE中绑定WHERE IN子句参数</div>
+      <div>https://blog.supersource.top/2023/09/17/在MySQL的PREPARE中绑定WHERE-IN子句参数/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>看热闹的咸鱼</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2023年9月17日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2023/08/06/Redis-Pipeline%E7%AE%A1%E9%81%93%E6%8A%80%E6%9C%AF/" title="Redis Pipeline管道技术">
+                        <span class="hidden-mobile">Redis Pipeline管道技术</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  
+  
+    <article id="comments" lazyload>
+      
+  <div id="waline"></div>
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#waline', function() {
+      Fluid.utils.createCssLink('https://cdn.staticfile.org/waline/2.15.5/waline.min.css')
+      Fluid.utils.createScript('https://cdn.staticfile.org/waline/2.15.5/waline.min.js', function() {
+        var options = Object.assign(
+          {"serverURL":"https://889kzdux.api.lncldglobal.com","path":"window.location.pathname","meta":["nick","mail","link"],"requiredMeta":["nick"],"lang":"zh-CN","emoji":["https://cdn.jsdelivr.net/gh/walinejs/emojis/weibo"],"dark":"html[data-user-color-scheme=\"dark\"]","wordLimit":0,"pageSize":10},
+          {
+            el: '#waline',
+            path: window.location.pathname
+          }
+        )
+        Waline.init(options);
+        Fluid.utils.waitElementVisible('#waline .vcontent', () => {
+          var imgSelector = '#waline .vcontent img:not(.vemoji)';
+          Fluid.plugins.imageCaption(imgSelector);
+          Fluid.plugins.fancyBox(imgSelector);
+        })
+      });
+    });
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+    </article>
+  
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
