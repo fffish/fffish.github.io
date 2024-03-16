@@ -261,7 +261,7 @@
       
       <a class="index-excerpt index-excerpt__noimg" href="/mysql_prepare_where_in/" target="_self">
         <div>
-          在MySQL的PREPARE中绑定WHERE IN子句参数1. PREPARE简介在 MySQL 中，PREPARE 是一种用于准备执行动态 SQL 语句的机制。通过 PREPARE，你可以将一个 SQL 查询或操作的查询计划（执行计划）准备好，然后在稍后的时间点执行它，而不是立即执行。这带来了以下好处：  SQL 注入防护： 使用 PREPARE 可以在准备 SQL 语句时进行参数绑定，从而防止
+          在 MySQL 中，PREPARE 是一种用于准备执行动态 SQL 语句的机制。通过 PREPARE，你可以将一个 SQL 查询或操作的查询计划（执行计划）准备好，然后在稍后的时间点执行它，而不是立即执行。这带来了以下好处...
         </div>
       </a>
 
@@ -294,7 +294,7 @@
       
       <a class="index-excerpt index-excerpt__noimg" href="/redis_pipeline/" target="_self">
         <div>
-          1.什么是pipelinePipeline是Redis提供的一种批量请求机制，可以在client端对多条命令进行打包，然后一次性发送给服务器，避免了多次网络往返的开销。 2.pipeline的优势为了解释pipeline的作用，我们先思考一个问题: 如果客户端需要依次执行多条Redis命令，该如何处理？
+          Pipeline是Redis提供的一种批量请求机制，可以在client端对多条命令进行打包，然后一次性发送给服务器，避免了多次网络往返的开销...
         </div>
       </a>
 
@@ -327,7 +327,7 @@
       
       <a class="index-excerpt index-excerpt__noimg" href="/mysql_use_binlog/" target="_self">
         <div>
-          1. 什么是BinlogMySQL的二进制日志（Binlog）是一种事务日志，用于记录对数据库的更改操作。Binlog主要用于MySQL复制和恢复:  复制: 从库通过拉取主库的binlog实现主从数据一致 恢复: 通过重放binlog恢复数据丢失或误操作情况  1.1. Binlog的工作原理在MySQL中，每个事务都会在提交后生成相应的Binlog记录。MySQL服务器会为每个客户端连接创建一
+          MySQL的二进制日志（Binlog）是一种事务日志，用于记录对数据库的更改操作。Binlog主要用于MySQL复制和恢复...
         </div>
       </a>
 
@@ -360,7 +360,7 @@
       
       <a class="index-excerpt index-excerpt__noimg" href="/mysql_use_json/" target="_self">
         <div>
-          1.概述：MySQL从5.7版本开始引入了对JSON数据类型的原生支持。这个增强功能使开发人员能够直接在数据库中存储、操作和查询JSON数据。 MySQL的JSON字段为存储半结构化数据提供了更加灵活和高效的方式。相比传统的关系型数据库，使用JSON字段的优势包括：  灵活性：JSON字段可以存储不同结构的数据，无需提前定义表结构。 扩展性：可以轻松地添加新的属性或字段，无需修改表结构。 快速开发
+          MySQL从5.7版本开始引入了对JSON数据类型的原生支持。这个增强功能使开发人员能够直接在数据库中存储、操作和查询JSON数据...
         </div>
       </a>
 
@@ -393,7 +393,7 @@
       
       <a class="index-excerpt index-excerpt__noimg" href="/hiredis_sync_async/" target="_self">
         <div>
-          1.什么是hiredisHiredis 是一个 C 语言编写的 Redis 客户端库，用于与 Redis 数据库进行交互。它提供了一个简洁而高效的接口，使开发人员可以方便地在自己的 C/C++ 项目中使用 Redis。Hiredis 是一个开源项目，可从其官方 GitHub 仓库获取源代码，并在符合 BSD 许可证的条件下使用和分发。它被广泛应用于各种 C/C++ 项目中，特别是那些需要与 Red
+          Hiredis 是一个 C 语言编写的 Redis 客户端库，用于与 Redis 数据库进行交互。它提供了一个简洁而高效的接口，使开发人员可以方便地在自己的 C/C++ 项目中使用 Redis。Hiredis 是一个开源项目，可从其官方 GitHub 仓库获取源代码，并在符合 BSD 许可证的条件下使用和分发。它被广泛应用于各种 C/C++ 项目中，特别是那些需要与 Redis 数据库进行快速、可
         </div>
       </a>
 
@@ -426,7 +426,7 @@
       
       <a class="index-excerpt index-excerpt__noimg" href="/insertion_sort/" target="_self">
         <div>
-          1. 概述插入排序（Insertion Sort）是一种简单且直观的排序算法。它的基本思想是将未排序的元素逐个插入到已排序的部分中，最终得到一个完全有序的序列。 2. 基本原理插入排序的核心思想是从未排序的元素中取出一个元素，将其逐个与已排序的元素进行比较，并插入到正确的位置，以保证已排序的部分始终有序。 具体步骤如下：  假设第一个元素已经是有序的序列，可以将其视为已排序部分。 从第二个元素开始
+          插入排序（Insertion Sort）是一种简单且直观的排序算法。它的基本思想是将未排序的元素逐个插入到已排序的部分中，最终得到一个完全有序的序列...
         </div>
       </a>
 
@@ -480,7 +480,7 @@
       
       <a class="index-excerpt index-excerpt__noimg" href="/merge_sort/" target="_self">
         <div>
-          1.概述归并排序由冯·诺伊曼在1945年首次提出，是一种典型的分治思想：将问题拆分，递归处理，然后合并。归并排序的基础思路是，当一个数组的前后两部分都是有序的话，那么可以在O(n)时间内合并，使整个数组有序。归并排序的算法复杂度，在最好、最坏和平均的情况下，都是O(nLogn)。 2.算法归并排序有两种思路：自顶向下和自底向上。 自顶向下就是先将数组作为整体，设数组长度为n，则先分成两个n/2的数
+          归并排序由冯·诺伊曼在1945年首次提出，是一种典型的分治思想：将问题拆分，递归处理，然后合并。归并排序的基础思路是，当一个数组的前后两部分都是有序的话，那么可以在*O*(*n*)时间内合并，使整个数组有序。归并排序的算法复杂度，在最好、最坏和平均的情况下，都是O(nLogn)...
         </div>
       </a>
 
@@ -534,7 +534,7 @@
       
       <a class="index-excerpt index-excerpt__noimg" href="/qsort/" target="_self">
         <div>
-          1.概述快速排序最初由一位英国计算机科学家Tony Hoare提出的。Tony Hoare是计算机科学领域的前辈之一，也是算法设计方面的专家，他在1960年代提出了快速排序算法，从那时起，快速排序就成为了许多经典排序算法之一，并且一直广泛应用在计算机科学领域。 快速排序被认为是最快的排序算法之一，因为它具有优秀的平均时间复杂度O(n logn)，此外，快速排序使用了一种高效的分治策略，可以在排序过
+          快速排序被认为是最快的排序算法之一，因为它具有优秀的平均时间复杂度 O(n logn)，此外，快速排序使用了一种高效的分治策略，可以在排序过程中大大降低内存占用，这使得它可以处理大型数据集，从而在实践中诞生出一个有效率的排序算法，因此被命名为快速排序...
         </div>
       </a>
 
@@ -595,7 +595,7 @@
       
       <a class="index-excerpt index-excerpt__noimg" href="/mysql_5_7_reset_password/" target="_self">
         <div>
-          修改配置文件并重启:1[root@localhost ~]# vi /etc/my.cnf  在[mysqld]添加一行1skip-grant-tables  重启服务1[root@localhost ~]# systemctl restart mysqld 进入mysql修改root密码：12[root@localhost ~]# mysql -urootmysql&gt; update my
+          先修改my.cnf，使得可以免密码登录，然后使用语句：update mysql.user set authentication_string...
         </div>
       </a>
 
@@ -656,7 +656,7 @@
       
       <a class="index-excerpt index-excerpt__noimg" href="/regular_expression/" target="_self">
         <div>
-          1. 什么是正则表达式　　正则表达式（regular expression）是一组用来匹配模式的字符串，通过定义规则，来实现字符串的查找、替换和验证。举个例子，你可以用正则表达式来查找一段字符串中的数字；再比如说，可以将字符串中符合规则的子串替换成另外的字符；又或者，用正则表达式来验证用户输入的密码是否符合某种规范（比如长度6-8个字符，同时包含大小写字母和数字）。 　　不同语言的正则表达式有不同
+          正则表达式（regular expression）是一组用来匹配模式的字符串，通过定义规则，来实现字符串的查找、替换和验证。举个例子，你可以用正则表达式来查找一段字符串中的数字；再比如说，可以将字符串中符合规则的子串替换成另外的字符；又或者，用正则表达式来验证用户输入的密码是否符合某种规范...
         </div>
       </a>
 

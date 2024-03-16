@@ -16,15 +16,15 @@
   <meta name="author" content="看热闹的咸鱼">
   <meta name="keywords" content="">
   
-    <meta name="description" content="1.什么是hiredisHiredis 是一个 C 语言编写的 Redis 客户端库，用于与 Redis 数据库进行交互。它提供了一个简洁而高效的接口，使开发人员可以方便地在自己的 C&#x2F;C++ 项目中使用 Redis。Hiredis 是一个开源项目，可从其官方 GitHub 仓库获取源代码，并在符合 BSD 许可证的条件下使用和分发。它被广泛应用于各种 C&#x2F;C++ 项目中，特别是那些需要与 Red">
+    <meta name="description" content="Hiredis 是一个 C 语言编写的 Redis 客户端库，用于与 Redis 数据库进行交互。它提供了一个简洁而高效的接口，使开发人员可以方便地在自己的 C&#x2F;C++ 项目中使用 Redis。Hiredis 是一个开源项目，可从其官方 GitHub 仓库获取源代码，并在符合 BSD 许可证的条件下使用和分发。它被广泛应用于各种 C&#x2F;C++ 项目中，特别是那些需要与 Redis 数据库进行快速、可">
 <meta property="og:type" content="article">
 <meta property="og:title" content="hiredis的同步模式和异步模式">
 <meta property="og:url" content="https://blog.supersource.top/hiredis_sync_async/index.html">
 <meta property="og:site_name" content="每个人都有需要安静的时候">
-<meta property="og:description" content="1.什么是hiredisHiredis 是一个 C 语言编写的 Redis 客户端库，用于与 Redis 数据库进行交互。它提供了一个简洁而高效的接口，使开发人员可以方便地在自己的 C&#x2F;C++ 项目中使用 Redis。Hiredis 是一个开源项目，可从其官方 GitHub 仓库获取源代码，并在符合 BSD 许可证的条件下使用和分发。它被广泛应用于各种 C&#x2F;C++ 项目中，特别是那些需要与 Red">
+<meta property="og:description" content="Hiredis 是一个 C 语言编写的 Redis 客户端库，用于与 Redis 数据库进行交互。它提供了一个简洁而高效的接口，使开发人员可以方便地在自己的 C&#x2F;C++ 项目中使用 Redis。Hiredis 是一个开源项目，可从其官方 GitHub 仓库获取源代码，并在符合 BSD 许可证的条件下使用和分发。它被广泛应用于各种 C&#x2F;C++ 项目中，特别是那些需要与 Redis 数据库进行快速、可">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2023-06-18T10:31:03.000Z">
-<meta property="article:modified_time" content="2024-03-16T15:12:48.319Z">
+<meta property="article:modified_time" content="2024-03-16T15:43:04.511Z">
 <meta property="article:author" content="看热闹的咸鱼">
 <meta name="twitter:card" content="summary_large_image">
   
@@ -310,7 +310,7 @@
               <div class="markdown-body">
                 
                 <h3 id="1-什么是hiredis"><a href="#1-什么是hiredis" class="headerlink" title="1.什么是hiredis"></a>1.什么是hiredis</h3><p>Hiredis 是一个 C 语言编写的 Redis 客户端库，用于与 Redis 数据库进行交互。它提供了一个简洁而高效的接口，使开发人员可以方便地在自己的 C/C++ 项目中使用 Redis。<br>Hiredis 是一个开源项目，可从其官方 GitHub 仓库获取源代码，并在符合 BSD 许可证的条件下使用和分发。它被广泛应用于各种 C/C++ 项目中，特别是那些需要与 Redis 数据库进行快速、可靠和高性能交互的应用程序。</p>
-<span id="more"></span>
+<!-- more -->
 
 <h3 id="2-安装hiredis"><a href="#2-安装hiredis" class="headerlink" title="2.安装hiredis"></a>2.安装hiredis</h3><p>在<code>centos</code>中可以使用<code>yum</code>直接安装：<br><code>yum install hiredis-devel</code></p>
 <p>或者直接从源码安装：</p>

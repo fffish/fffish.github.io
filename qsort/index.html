@@ -16,16 +16,16 @@
   <meta name="author" content="看热闹的咸鱼">
   <meta name="keywords" content="">
   
-    <meta name="description" content="1.概述快速排序最初由一位英国计算机科学家Tony Hoare提出的。Tony Hoare是计算机科学领域的前辈之一，也是算法设计方面的专家，他在1960年代提出了快速排序算法，从那时起，快速排序就成为了许多经典排序算法之一，并且一直广泛应用在计算机科学领域。 快速排序被认为是最快的排序算法之一，因为它具有优秀的平均时间复杂度O(n logn)，此外，快速排序使用了一种高效的分治策略，可以在排序过">
+    <meta name="description" content="快速排序被认为是最快的排序算法之一，因为它具有优秀的平均时间复杂度 O(n logn)，此外，快速排序使用了一种高效的分治策略，可以在排序过程中大大降低内存占用，这使得它可以处理大型数据集，从而在实践中诞生出一个有效率的排序算法，因此被命名为快速排序...">
 <meta property="og:type" content="article">
 <meta property="og:title" content="快速排序的实现">
 <meta property="og:url" content="https://blog.supersource.top/qsort/index.html">
 <meta property="og:site_name" content="每个人都有需要安静的时候">
-<meta property="og:description" content="1.概述快速排序最初由一位英国计算机科学家Tony Hoare提出的。Tony Hoare是计算机科学领域的前辈之一，也是算法设计方面的专家，他在1960年代提出了快速排序算法，从那时起，快速排序就成为了许多经典排序算法之一，并且一直广泛应用在计算机科学领域。 快速排序被认为是最快的排序算法之一，因为它具有优秀的平均时间复杂度O(n logn)，此外，快速排序使用了一种高效的分治策略，可以在排序过">
+<meta property="og:description" content="快速排序被认为是最快的排序算法之一，因为它具有优秀的平均时间复杂度 O(n logn)，此外，快速排序使用了一种高效的分治策略，可以在排序过程中大大降低内存占用，这使得它可以处理大型数据集，从而在实践中诞生出一个有效率的排序算法，因此被命名为快速排序...">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://img.supersource.top:8080/image/qsort.gif">
 <meta property="article:published_time" content="2023-04-09T16:03:26.000Z">
-<meta property="article:modified_time" content="2024-03-16T15:14:19.449Z">
+<meta property="article:modified_time" content="2024-03-16T15:40:40.136Z">
 <meta property="article:author" content="看热闹的咸鱼">
 <meta property="article:tag" content="算法">
 <meta name="twitter:card" content="summary_large_image">
@@ -323,7 +323,7 @@
 </ol>
 <p>递归的结束条件，是数组的长度小于等于1。</p>
 <p>根据以上描述，可以写出以下递归代码：</p>
-<span id="more"></span>
+<!--more-->
 
 <figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs reasonml">void quick<span class="hljs-constructor">Sort(<span class="hljs-params">vector</span>&lt;<span class="hljs-params">int</span>&gt;&amp; <span class="hljs-params">nums</span>, <span class="hljs-params">int</span> <span class="hljs-params">left</span>, <span class="hljs-params">int</span> <span class="hljs-params">right</span>)</span> &#123;<br>    <span class="hljs-keyword">if</span> (left &lt; right) &#123;<br>        <span class="hljs-built_in">int</span> pivotIndex = partition(nums, left, right);  <span class="hljs-comment">// 找出基准并进行分隔，返回基准值的下标</span><br>        quick<span class="hljs-constructor">Sort(<span class="hljs-params">nums</span>, <span class="hljs-params">left</span>, <span class="hljs-params">pivotIndex</span> - 1)</span>;          <span class="hljs-comment">// 此时left到pivotIndex - 1的值都比基准值小，对这个子数组进行排序</span><br>        quick<span class="hljs-constructor">Sort(<span class="hljs-params">nums</span>, <span class="hljs-params">pivotIndex</span> + 1, <span class="hljs-params">right</span>)</span>;         <span class="hljs-comment">// 此时pivotIndex - 1到right的值都比基准值大，对这个子数组进行排序</span><br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
 

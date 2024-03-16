@@ -16,15 +16,15 @@
   <meta name="author" content="看热闹的咸鱼">
   <meta name="keywords" content="">
   
-    <meta name="description" content="修改配置文件并重启:1[root@localhost ~]# vi &#x2F;etc&#x2F;my.cnf  在[mysqld]添加一行1skip-grant-tables  重启服务1[root@localhost ~]# systemctl restart mysqld 进入mysql修改root密码：12[root@localhost ~]# mysql -urootmysql&gt; update my">
+    <meta name="description" content="先修改my.cnf，使得可以免密码登录，然后使用语句：update mysql.user set authentication_string...">
 <meta property="og:type" content="article">
 <meta property="og:title" content="MySQL5.7忘记root密码如何重置">
 <meta property="og:url" content="https://blog.supersource.top/mysql_5_7_reset_password/index.html">
 <meta property="og:site_name" content="每个人都有需要安静的时候">
-<meta property="og:description" content="修改配置文件并重启:1[root@localhost ~]# vi &#x2F;etc&#x2F;my.cnf  在[mysqld]添加一行1skip-grant-tables  重启服务1[root@localhost ~]# systemctl restart mysqld 进入mysql修改root密码：12[root@localhost ~]# mysql -urootmysql&gt; update my">
+<meta property="og:description" content="先修改my.cnf，使得可以免密码登录，然后使用语句：update mysql.user set authentication_string...">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2022-09-07T14:47:00.000Z">
-<meta property="article:modified_time" content="2024-03-16T15:15:01.740Z">
+<meta property="article:modified_time" content="2024-03-16T15:39:23.014Z">
 <meta property="article:author" content="看热闹的咸鱼">
 <meta property="article:tag" content="MySQL">
 <meta name="twitter:card" content="summary_large_image">
@@ -318,7 +318,7 @@
 重启服务<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs linux">[root@localhost ~]# systemctl restart mysqld<br></code></pre></td></tr></table></figure></li>
 <li>进入mysql修改root密码：<figure class="highlight n1ql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs n1ql">[root@localhost ~]# mysql -uroot<br>mysql&gt; <span class="hljs-keyword">update</span> mysql.<span class="hljs-keyword">user</span> <span class="hljs-keyword">set</span> authentication_string=<span class="hljs-keyword">password</span>(<span class="hljs-string">&#x27;newPassWord!123&#x27;</span>) <span class="hljs-keyword">where</span> <span class="hljs-keyword">user</span>=<span class="hljs-string">&#x27;root&#x27;</span> <span class="hljs-keyword">and</span> host=<span class="hljs-string">&#x27;localhost&#x27;</span>;<br></code></pre></td></tr></table></figure>
 
-<span id="more"></span>
+<!-- more -->
 
 * mysql5.7密码要求<code>大小写字母</code>、<code>数字</code>和<code>特殊符号</code></li>
 <li>退出mysql，重新修改<code>/etc/my.cnf</code>，删掉<code>skip-grant-tables</code></li>

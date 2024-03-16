@@ -16,15 +16,15 @@
   <meta name="author" content="看热闹的咸鱼">
   <meta name="keywords" content="">
   
-    <meta name="description" content="在MySQL的PREPARE中绑定WHERE IN子句参数1. PREPARE简介在 MySQL 中，PREPARE 是一种用于准备执行动态 SQL 语句的机制。通过 PREPARE，你可以将一个 SQL 查询或操作的查询计划（执行计划）准备好，然后在稍后的时间点执行它，而不是立即执行。这带来了以下好处：  SQL 注入防护： 使用 PREPARE 可以在准备 SQL 语句时进行参数绑定，从而防止">
+    <meta name="description" content="在 MySQL 中，PREPARE 是一种用于准备执行动态 SQL 语句的机制。通过 PREPARE，你可以将一个 SQL 查询或操作的查询计划（执行计划）准备好，然后在稍后的时间点执行它，而不是立即执行。这带来了以下好处...">
 <meta property="og:type" content="article">
 <meta property="og:title" content="在MySQL的PREPARE中绑定WHERE IN子句参数">
 <meta property="og:url" content="https://blog.supersource.top/mysql_prepare_where_in/index.html">
 <meta property="og:site_name" content="每个人都有需要安静的时候">
-<meta property="og:description" content="在MySQL的PREPARE中绑定WHERE IN子句参数1. PREPARE简介在 MySQL 中，PREPARE 是一种用于准备执行动态 SQL 语句的机制。通过 PREPARE，你可以将一个 SQL 查询或操作的查询计划（执行计划）准备好，然后在稍后的时间点执行它，而不是立即执行。这带来了以下好处：  SQL 注入防护： 使用 PREPARE 可以在准备 SQL 语句时进行参数绑定，从而防止">
+<meta property="og:description" content="在 MySQL 中，PREPARE 是一种用于准备执行动态 SQL 语句的机制。通过 PREPARE，你可以将一个 SQL 查询或操作的查询计划（执行计划）准备好，然后在稍后的时间点执行它，而不是立即执行。这带来了以下好处...">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2023-09-17T15:27:07.000Z">
-<meta property="article:modified_time" content="2024-03-16T15:08:23.319Z">
+<meta property="article:modified_time" content="2024-03-16T15:44:57.427Z">
 <meta property="article:author" content="看热闹的咸鱼">
 <meta name="twitter:card" content="summary_large_image">
   
@@ -316,7 +316,7 @@
 <li>重用性： 通过准备语句，你可以在应用程序的生命周期内多次执行相同的 SQL 查询，而无需每次都重新构建查询字符串。这提高了代码的重用性和可维护性。</li>
 <li>减少通信开销： 对于一些数据库连接，特别是远程连接，通信开销可能相对较高。通过准备语句，你可以在一次通信中将 SQL 查询计划发送到数据库服务器，然后多次执行该查询，减少了通信开销。</li>
 </ol>
-<span id="more"></span>
+<!-- more -->
 
 <h4 id="2-PREPARE使用"><a href="#2-PREPARE使用" class="headerlink" title="2. PREPARE使用"></a>2. PREPARE使用</h4><p>下面是使用 PREPARE 和 EXECUTE 的一般步骤：</p>
 <ol>
