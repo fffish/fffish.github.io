@@ -23,13 +23,13 @@
 <meta property="og:site_name" content="每个人都有需要安静的时候">
 <meta property="og:description" content="快速排序被认为是最快的排序算法之一，因为它具有优秀的平均时间复杂度 O(n logn)，此外，快速排序使用了一种高效的分治策略，可以在排序过程中大大降低内存占用，这使得它可以处理大型数据集，从而在实践中诞生出一个有效率的排序算法，因此被命名为快速排序...">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://img.supersource.top:8080/image/qsort.gif">
+<meta property="og:image" content="https://blog.supersource.top/img/blog/qsort.gif">
 <meta property="article:published_time" content="2023-04-09T16:03:26.000Z">
-<meta property="article:modified_time" content="2024-03-16T15:40:40.136Z">
+<meta property="article:modified_time" content="2024-03-17T08:17:43.220Z">
 <meta property="article:author" content="看热闹的咸鱼">
 <meta property="article:tag" content="算法">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="http://img.supersource.top:8080/image/qsort.gif">
+<meta name="twitter:image" content="https://blog.supersource.top/img/blog/qsort.gif">
   
   
   
@@ -331,7 +331,7 @@
 <ul>
 <li>首先我们选择一个基准，放在最左边；</li>
 <li>使用两个指针，一个从左往右寻找第一个大于等于基准的值，  另一个从右往左寻找第一个小于等于基准的值，  找到后交换两个值，逐渐实现目标：小于基准的在左，大于基准的在右。</li>
-<li>最终，当左边指针超过右边指针时，就可以退出循环。  此时，右边指针指向小于基准的最后一个值的下标，将其与起始位置交换，并返回这个下标。<br><img src="http://img.supersource.top:8080/image/qsort.gif" srcset="/img/loading.gif" lazyload alt="图1 一次partition的过程"></li>
+<li>最终，当左边指针超过右边指针时，就可以退出循环。  此时，右边指针指向小于基准的最后一个值的下标，将其与起始位置交换，并返回这个下标。<br><img src="/img/blog/qsort.gif" srcset="/img/loading.gif" lazyload alt="图1 一次partition的过程"></li>
 </ul>
 <p>代码如下：</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">partition</span><span class="hljs-params">(vector&lt;<span class="hljs-type">int</span>&gt;&amp; nums, <span class="hljs-type">int</span> left, <span class="hljs-type">int</span> right)</span> </span>&#123;<br>    <span class="hljs-type">int</span> p = left; <br>    <span class="hljs-type">int</span> pivot = nums[p];                        <span class="hljs-comment">// 这里简单的将left当作基准</span><br>    <span class="hljs-type">int</span> i = left + <span class="hljs-number">1</span>, j = right;                <span class="hljs-comment">// [i, j]表示需要遍历的区间</span><br>    <span class="hljs-keyword">while</span> (i &lt;= j) &#123;                            <span class="hljs-comment">// i &gt; j才结束，相等时也要和基准作比较</span><br>        <span class="hljs-keyword">while</span> (i &lt;= j &amp;&amp; nums[i] &lt; pivot) ++i;  <span class="hljs-comment">// i停留在第一个大于等于基准的下标，或者找不到这样的数值，停留在j+1</span><br>        <span class="hljs-keyword">while</span> (i &lt;= j &amp;&amp; nums[j] &gt; pivot) --j;  <span class="hljs-comment">// j停留在第一个小于等于基准的下标，或者找不到这样的数值，停留在i-1</span><br>        <span class="hljs-keyword">if</span> (i &lt; j) &#123;                        <span class="hljs-comment">// i &lt; j时，交换i和j的值，然后i++，j--，[i, j]依旧表示需要遍历的区间</span><br>            <span class="hljs-built_in">swap</span>(nums[i++], nums[j--]);     <span class="hljs-comment">// 此时[left, i)都是小于等于基准的值，(j, right]都是大于等于基准的值 </span><br>        &#125;<span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (i == j)&#123;                  <span class="hljs-comment">// i == j 只有一种情况，那就是nums[i] == pivot，此时让i+1退出循环</span><br>            i++;<br>        &#125;       <br>    &#125;<br>    <span class="hljs-built_in">swap</span>(nums[p], nums[j]);             <span class="hljs-comment">// 此时j == i - 1，[left, i) == [left, j]，即j是小于等于pivot的最后一个下标，将其与基准交换，</span><br>    <span class="hljs-keyword">return</span> j;                           <span class="hljs-comment">// j就是基准最终的位置</span><br>&#125;<br></code></pre></td></tr></table></figure>
