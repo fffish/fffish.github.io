@@ -2,6 +2,15 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://blog.supersource.top/redis_cluster_use_docker/</loc>
+    
+    <lastmod>2024-03-28</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>https://blog.supersource.top/qsort/</loc>
     
     <lastmod>2024-03-17</lastmod>
@@ -103,7 +112,7 @@
 
   <url>
     <loc>https://blog.supersource.top/</loc>
-    <lastmod>2024-03-26</lastmod>
+    <lastmod>2024-03-28</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
@@ -111,21 +120,28 @@
   
   <url>
     <loc>https://blog.supersource.top/tags/MySQL/</loc>
-    <lastmod>2024-03-26</lastmod>
+    <lastmod>2024-03-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://blog.supersource.top/tags/PHP/</loc>
-    <lastmod>2024-03-26</lastmod>
+    <lastmod>2024-03-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://blog.supersource.top/tags/redis/</loc>
+    <lastmod>2024-03-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://blog.supersource.top/tags/%E7%AE%97%E6%B3%95/</loc>
-    <lastmod>2024-03-26</lastmod>
+    <lastmod>2024-03-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
@@ -134,14 +150,21 @@
   
   <url>
     <loc>https://blog.supersource.top/categories/MySQL/</loc>
-    <lastmod>2024-03-26</lastmod>
+    <lastmod>2024-03-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://blog.supersource.top/categories/redis/</loc>
+    <lastmod>2024-03-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://blog.supersource.top/categories/%E7%AE%97%E6%B3%95/</loc>
-    <lastmod>2024-03-26</lastmod>
+    <lastmod>2024-03-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
