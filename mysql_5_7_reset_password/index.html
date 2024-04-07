@@ -311,19 +311,31 @@
               <div class="markdown-body">
                 
                 <ol>
-<li>修改配置文件并重启:<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs linux">[root@localhost ~]# vi /etc/my.cnf<br></code></pre></td></tr></table></figure>
-
-在[mysqld]添加一行<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">skip</span><span class="hljs-operator">-</span><span class="hljs-keyword">grant</span><span class="hljs-operator">-</span>tables<br></code></pre></td></tr></table></figure>
-
-重启服务<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs linux">[root@localhost ~]# systemctl restart mysqld<br></code></pre></td></tr></table></figure></li>
-<li>进入mysql修改root密码：<figure class="highlight n1ql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs n1ql">[root@localhost ~]# mysql -uroot<br>mysql&gt; <span class="hljs-keyword">update</span> mysql.<span class="hljs-keyword">user</span> <span class="hljs-keyword">set</span> authentication_string=<span class="hljs-keyword">password</span>(<span class="hljs-string">&#x27;newPassWord!123&#x27;</span>) <span class="hljs-keyword">where</span> <span class="hljs-keyword">user</span>=<span class="hljs-string">&#x27;root&#x27;</span> <span class="hljs-keyword">and</span> host=<span class="hljs-string">&#x27;localhost&#x27;</span>;<br></code></pre></td></tr></table></figure>
-
+<li>
+<p>修改配置文件并重启:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs linux">[root@localhost ~]# vi /etc/my.cnf<br></code></pre></td></tr></table></figure>
+<p>在[mysqld]添加一行</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">skip</span><span class="hljs-operator">-</span><span class="hljs-keyword">grant</span><span class="hljs-operator">-</span>tables<br></code></pre></td></tr></table></figure>
+<p>重启服务</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs linux">[root@localhost ~]# systemctl restart mysqld<br></code></pre></td></tr></table></figure>
+</li>
+<li>
+<p>进入mysql修改root密码：</p>
+<figure class="highlight n1ql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs n1ql">[root@localhost ~]# mysql -uroot<br>mysql&gt; <span class="hljs-keyword">update</span> mysql.<span class="hljs-keyword">user</span> <span class="hljs-keyword">set</span> authentication_string=<span class="hljs-keyword">password</span>(<span class="hljs-string">&#x27;newPassWord!123&#x27;</span>) <span class="hljs-keyword">where</span> <span class="hljs-keyword">user</span>=<span class="hljs-string">&#x27;root&#x27;</span> <span class="hljs-keyword">and</span> host=<span class="hljs-string">&#x27;localhost&#x27;</span>;<br></code></pre></td></tr></table></figure>
 <!-- more -->
-
-* mysql5.7密码要求<code>大小写字母</code>、<code>数字</code>和<code>特殊符号</code></li>
-<li>退出mysql，重新修改<code>/etc/my.cnf</code>，删掉<code>skip-grant-tables</code></li>
-<li>重启服务<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs linux">[root@localhost ~]# systemctl restart mysqld<br></code></pre></td></tr></table></figure></li>
-<li>使用新密码登录：<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs linux">[root@localhost ~]# mysql -uroot -p<br></code></pre></td></tr></table></figure></li>
+<p>* mysql5.7密码要求<code>大小写字母</code>、<code>数字</code>和<code>特殊符号</code></p>
+</li>
+<li>
+<p>退出mysql，重新修改<code>/etc/my.cnf</code>，删掉<code>skip-grant-tables</code></p>
+</li>
+<li>
+<p>重启服务</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs linux">[root@localhost ~]# systemctl restart mysqld<br></code></pre></td></tr></table></figure>
+</li>
+<li>
+<p>使用新密码登录：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs linux">[root@localhost ~]# mysql -uroot -p<br></code></pre></td></tr></table></figure>
+</li>
 </ol>
 
                 

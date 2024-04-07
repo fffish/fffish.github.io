@@ -311,10 +311,10 @@
             
               <div class="markdown-body">
                 
-                <h3 id="1-skynet启动的第一个服务"><a href="#1-skynet启动的第一个服务" class="headerlink" title="1 skynet启动的第一个服务"></a>1 skynet启动的第一个服务</h3><p>我们知道，<code>skynet</code>以<code>服务(service</code>)为基础，那么，当我们输入指令<code>&gt; skynet examples/config</code>之后，<code>skynet</code>启动的第一个服务会是什么呢？</p>
+                <h3 id="1-skynet启动的第一个服务">1 skynet启动的第一个服务</h3>
+<p>我们知道，<code>skynet</code>以<code>服务(service</code>)为基础，那么，当我们输入指令<code>&gt; skynet examples/config</code>之后，<code>skynet</code>启动的第一个服务会是什么呢？</p>
 <p>这一点我们先看看最常用的配置文件，通常会有这么两行：</p>
 <figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs lua">start = <span class="hljs-string">&quot;main&quot;</span>	<span class="hljs-comment">-- main script</span><br>bootstrap = <span class="hljs-string">&quot;snlua bootstrap&quot;</span>	<span class="hljs-comment">-- The service for bootstrap</span><br></code></pre></td></tr></table></figure>
-
 <p>其中，<code>bootstrap</code>是指定启动的第一个服务：<code>snlua</code>，及其参数：<code>bootstrap</code></p>
 <p><code>snlua</code>是<code>skynet</code>内置的一个最常用的<code>c服务</code>，以<code>.so</code>的形式存在于<code>cservice/</code>目录下，简单地说，就是用来启动一个lua服务。</p>
 <p><code>snlua bootstrap</code>则是将<code>bootstrap</code>作为参数传给<code>snlua</code>服务。</p>
@@ -322,11 +322,11 @@
 <blockquote>
 <p>理论上，我们也可以配置成<code>bootstrap=&quot;snlua myBoot&quot;</code>，使用我们自己的启动脚本，但没必要，skynet默认的bootstrap已经帮我们将事情都处理好了。</p>
 </blockquote>
-<h3 id="2-lualib-loader-lua做了些什么"><a href="#2-lualib-loader-lua做了些什么" class="headerlink" title="2 ./lualib/loader.lua做了些什么"></a>2 ./lualib/loader.lua做了些什么</h3><p><code>loader.lua</code>可以接收多个参数，其中第一个参数是服务名，其他的是服务启动的参数。</p>
+<h3 id="2-lualib-loader-lua做了些什么">2 ./lualib/loader.lua做了些什么</h3>
+<p><code>loader.lua</code>可以接收多个参数，其中第一个参数是服务名，其他的是服务启动的参数。</p>
 <p><code>loader</code>如何根据服务名来找到对应的入口文件呢？</p>
 <p>答案是配置文件中的<code>luaservice</code>，在示例的配置中，<code>luaservice</code>长这样：</p>
 <figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs lua">luaservice = root..<span class="hljs-string">&quot;service/?.lua;&quot;</span>..root..<span class="hljs-string">&quot;test/?.lua;&quot;</span>..root..<span class="hljs-string">&quot;examples/?.lua;&quot;</span>..root..<span class="hljs-string">&quot;test/?/init.lua&quot;</span><br></code></pre></td></tr></table></figure>
-
 <p>那么，<code>skynet</code>会<code>按顺序</code>依次查找文件<code>service/bootstrap.lua</code>,<code>test/boostrape.lua</code>,<code>examples/bootstrap.lua</code>,<code>test/bootstrap/init.lua</code>，找到<code>第一个</code>存在的文件，然后调用这个文件。如果所有文件都不存在，则抛出错误。</p>
 <blockquote>
 <p>在调用<code>bootstrap.lua</code>之前，如果配置文件配置了<code>preload</code>，则会先调用这个<code>preload</code>文件</p>
@@ -334,9 +334,9 @@
 <blockquote>
 <p>理论上，我们也可以配置自己的<code>loader</code>文件，不一定要使用系统的<code>loader.lua</code>，但这通常也是不必要的</p>
 </blockquote>
-<h3 id="3-bootstrap-lua又做了些什么"><a href="#3-bootstrap-lua又做了些什么" class="headerlink" title="3. bootstrap.lua又做了些什么"></a>3. bootstrap.lua又做了些什么</h3><p>通过<code>loader.lua</code>，我们找到了<code>service/bootstrap.lua</code>这个文件，这里就是常用的<code>skynet</code>的<code>lua</code>服务写法：</p>
+<h3 id="3-bootstrap-lua又做了些什么">3. bootstrap.lua又做了些什么</h3>
+<p>通过<code>loader.lua</code>，我们找到了<code>service/bootstrap.lua</code>这个文件，这里就是常用的<code>skynet</code>的<code>lua</code>服务写法：</p>
 <figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs lua"><span class="hljs-keyword">local</span> skynet = <span class="hljs-built_in">require</span> <span class="hljs-string">&quot;skynet&quot;</span><br>skynet.start(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span></span><br>    <span class="hljs-comment">--...</span><br>    skynet.<span class="hljs-built_in">exit</span>()<br><span class="hljs-keyword">end</span>)<br></code></pre></td></tr></table></figure>
-
 <p>这里主要是启动了一些服务：</p>
 <ul>
 <li><code>launcher</code>：用来启动、管理<code>lua</code>服务，先启动这个服务，后续才能调用<code>skynet.newservice</code>等函数来启动服务。</li>
@@ -443,6 +443,12 @@
                 <div class="post-prevnext my-3">
                   <article class="post-prev col-6">
                     
+                    
+                      <a href="/skip_list_in_redis/" title="Redis的跳跃表">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Redis的跳跃表</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
                     
                   </article>
                   <article class="post-next col-6">
