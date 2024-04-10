@@ -31,7 +31,7 @@
 <meta property="og:image" content="https://blog.supersource.top/img/blog/double-r.png">
 <meta property="og:image" content="https://blog.supersource.top/img/blog/double_max_1.png">
 <meta property="article:published_time" content="2024-04-09T06:36:29.000Z">
-<meta property="article:modified_time" content="2024-04-09T16:14:14.085Z">
+<meta property="article:modified_time" content="2024-04-10T01:47:43.042Z">
 <meta property="article:author" content="看热闹的咸鱼">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://blog.supersource.top/img/blog/double.png">
@@ -258,7 +258,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          1.4k 字
+          1.5k 字
         
       </span>
     
@@ -372,8 +372,8 @@
 </ul>
 <h3 id="5-double所能表示的精确的最大正整数">5. <code>double</code>所能表示的精确的最大正整数</h3>
 <p>我们将尾数部分全都置1，再加上隐藏的1，可以形成一个53位的二进制数：<code>11111111111111111111111111111111111111111111111111111</code><br>
-再把指数部分设成<code>52+1023</code>，形成的数，就是 $ 2^{53}-1$ ，这就是double所能表示的精确的最大正整数。</p>
-<p>而如果再加1，会怎样呢？尾数部分为变成0，而指数加1，变成$ 2^{53}$，但这个数已经不精确了，我们用python来测试一下：</p>
+再把指数部分设成<code>52+1023</code>，形成的数，就是 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mn>2</mn><mn>53</mn></msup><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">{2}^{53}-1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8974em;vertical-align:-0.0833em;"></span><span class="mord"><span class="mord"><span class="mord">2</span></span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">53</span></span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span> ，这就是double所能表示的精确的最大正整数。</p>
+<p>而如果再加1，会怎样呢？尾数部分为变成0，而指数加1，变成<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mn>2</mn><mn>53</mn></msup></mrow><annotation encoding="application/x-tex">{2}^{53}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8141em;"></span><span class="mord"><span class="mord"><span class="mord">2</span></span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">53</span></span></span></span></span></span></span></span></span></span></span></span>，但这个数已经不精确了，我们用python来测试一下：</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-meta">&gt;&gt;&gt; </span>a = <span class="hljs-number">9007199254740991.0</span><br><span class="hljs-meta">&gt;&gt;&gt; </span>a - <span class="hljs-number">1</span><br><span class="hljs-number">9007199254740990.0</span><br><span class="hljs-meta">&gt;&gt;&gt; </span>a + <span class="hljs-number">1</span><br><span class="hljs-number">9007199254740992.0</span><br><span class="hljs-meta">&gt;&gt;&gt; </span>a + <span class="hljs-number">2</span><br><span class="hljs-number">9007199254740992.0</span><br><span class="hljs-meta">&gt;&gt;&gt; </span>a + <span class="hljs-number">3</span><br><span class="hljs-number">9007199254740994.0</span><br><span class="hljs-meta">&gt;&gt;&gt; </span>a - <span class="hljs-number">1</span> == a<br><span class="hljs-literal">False</span><br><span class="hljs-meta">&gt;&gt;&gt; </span>a + <span class="hljs-number">1</span> == a + <span class="hljs-number">2</span><br><span class="hljs-literal">True</span><br></code></pre></td></tr></table></figure>
 <p>可以看到，这里无法区分出<code>9007199254740992</code>和<code>9007199254740993</code>这两个数，因为它们在内存中的表现是一样的，如下图所示，最后黑色的0和1是被丢弃的，而只保留了52位尾数之后，两个数字就变成一样的，无法精确区分这两个数字了。</p>
 <p><img src="/img/blog/double_max_1.png" srcset="/img/loading.gif" lazyload alt="image"></p>
