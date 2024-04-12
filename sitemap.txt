@@ -1,3 +1,4 @@
+https://blog.supersource.top/redis_cluster_slot/
 https://blog.supersource.top/largest_accurately_integer_in_double_type/
 https://blog.supersource.top/skip_list_in_redis/
 https://blog.supersource.top/skynet_main_service_bootstrap/

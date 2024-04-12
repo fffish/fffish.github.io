@@ -4,6 +4,31 @@
   
   
   <entry>
+    <title>Redis报错：CROSSSLOT Keys in request don&#39;t hash to the same slot的解决方案</title>
+    <link href="/redis_cluster_slot/"/>
+    <url>/redis_cluster_slot/</url>
+    
+    <content type="html"><![CDATA[<p>最近，项目上线的时候，出现了一个Redis的报错：<code>CROSSSLOT Keys in request don't hash to the same slot</code>，这个在内网环境下无法复现，因为正式环境的Redis是cluster集群模式，而我们内网环境是单机模式。(后面我在内网也部署了一个Redis集群，具体见我这一篇文章 <a href="https://blog.supersource.top/redis_cluster_use_docker/">《使用Docker搭建Redis Cluster集群》</a>）</p><h3 id="Redis集群的slot概念">Redis集群的slot概念</h3><p>Redis的插槽(<code>Slot</code>)是用于实现集群分片(<code>Cluster Sharding</code>)的一种机制。Redis集群至少需要三个结点，每个结点处理一部分数据。那么怎样分配这些数据到各个结点呢？Redis Cluster 采用的是虚拟槽分区算法，其中提到了槽（<code>Slot</code>）的概念。这个槽是用来存放缓存信息的单位，在 Redis 中将存储空间分成了 <code>16384</code> （<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mn>2</mn><mn>14</mn></msup></mrow><annotation encoding="application/x-tex">{2}^{14}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8141em;"></span><span class="mord"><span class="mord"><span class="mord">2</span></span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">14</span></span></span></span></span></span></span></span></span></span></span></span>）个槽，也就是说 Redis Cluster 槽的范围是 0 -16383。</p><p>在存储数据的时候，集群会对 Key 进行 CRC16 校验并对 16384 取模：</p><p><code>slot = CRC16(key) % 16384</code></p><p>得到的结果就是 Key-Value 所放入的槽，从而实现自动分割数据到不同的节点上</p><p><img src="/img/blog/redis-slot.png" alt="image"></p><blockquote><p>为什么会是16384个插槽呢？Redis作者是这么说的：<a href="https://github.com/redis/redis/issues/2576">传送门</a></p></blockquote><h3 id="什么情况下会报这个错">什么情况下会报这个错</h3><p>在集群模式下，所有涉及到多个 <code>key</code>的Redis指令，都要求所有的 <code>key</code>处于同一个 <code>slot</code>，如果 <code>slot</code>不同，哪怕实际上这些 <code>slot</code>都在同一个结点上，也会报这个错：</p><p><code>CROSSSLOT Keys in request don't hash to the same slot</code></p><p>例如以下这些操作：</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs redis">SUNIONSTORE destination key [key ...]<br> SDIFF key [key ...]<br> EVAL script numkeys key [key ...] arg [arg ...]<br> DEL key [key ...]<br></code></pre></td></tr></table></figure><p>只要看到格式中有 <code>key [key ...]</code>这样的操作，在集群中，都必须保证所有 <code>key</code>在同一个 <code>slot</code>。</p><p>禁止不同的slot操作，大概有以下原因：</p><ol><li><strong>性能考虑</strong>：允许跨槽操作将需要在不同节点之间进行复杂的协调和网络通信，这可能会显著降低操作的性能。Redis设计为高性能的存储系统，这种设计选择有助于保持操作的速度和效率。</li><li><strong>简化分布式环境下的操作</strong>：通过限制操作仅在相同槽的键上执行，Redis Cluster简化了分布式环境下的数据管理。这样做减少了数据一致性和同步问题的复杂度，使得集群管理更为简单。</li><li><strong>提高可扩展性和可靠性</strong>：这种设计允许Redis Cluster在节点失败或网络分区发生时更容易地进行数据迁移和故障转移。如果允许跨槽操作，这将增加数据迁移和恢复的复杂性，可能会影响到整个系统的可靠性。</li><li><strong>分区的自治性</strong>：将数据划分到不同的槽中，并限制跨槽操作，有助于保证每个分区的自治性。这意味着每个节点可以独立处理其槽内的操作，从而减少了节点之间的依赖性。</li></ol><h3 id="要如何解决这个问题">要如何解决这个问题</h3><p>既然Redis集群不允许跨slot的操作，那我们只要让<code>key</code>强制分配到同一个<code>Slot</code>就行了。</p><p>上面说了，正常情况下，slot = CRC16(key)%16384，这里是对整个key进行CRC16。</p><p>Redis提供了一种<strong>Hash Tag</strong>的功能，在key中使用<code>&#123;&#125;</code>括起key中的一部分，在进行 CRC 16 (key) % 16384 的过程中，只会对<code>&#123;&#125;</code>内的字符串计算。</p><p>例如，<code>&#123;rank:level&#125;:1</code>,<code>&#123;rank:level&#125;:2</code>这两个key就会分配都同一个slot，因为计算哈希的时候，都使用了 <code>&#123;&#125;</code>中的那一部分:<code>rank:level</code>，所以分配出来的 <code>slot</code>就是一样的。</p><p>值得注意的是，这里的 <code>&#123;&#125;</code>可以放在key的任意位置，例如 <code>all&#123;rank:level&#125;</code>,<code>all&#123;rank:level&#125;:1</code>也都是一样的。</p><p>另外，如果有多个 <code>&#123;&#125;</code>的话，只有第一个 <code>&#123;&#125;</code>生效，例如 <code>&#123;rank:level&#125;:1:&#123;2&#125;</code>，用来计算哈希的只是第一个 <code>&#123;&#125;</code>里面的 <code>rank:level</code></p><h3 id="参考资料">参考资料</h3><ul><li><a href="https://blog.csdn.net/qq_35872777/article/details/130010497">[CSDN]Redis中的插槽(slot)</a></li></ul>]]></content>
+    
+    
+    <categories>
+      
+      <category>redis</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>redis</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
     <title>double类型中可精确表达的最大正整数</title>
     <link href="/largest_accurately_integer_in_double_type/"/>
     <url>/largest_accurately_integer_in_double_type/</url>
