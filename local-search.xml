@@ -4,6 +4,19 @@
   
   
   <entry>
+    <title>TCP的四次挥手过程</title>
+    <link href="/four_way_handshake_of_tcp/"/>
+    <url>/four_way_handshake_of_tcp/</url>
+    
+    <content type="html"><![CDATA[<p><code>TCP</code>连接是双向传输的对等的模式（全双工模式），就是说双方都可以同时向对方发送或接收数据。<br>而断开的时候，也是双方都可以主动断开，此时需要经过四次挥手的过程，流程如下图所示：<br><img src="/img/blog/four_way_handshake_of_TCP.png" alt="TCP四次挥手"></p><ol><li>主动方发送<code>FIN</code>包给被动方，主动方状态变成<code>FIN_WAIT_1</code>，等待被动方的确认。此时主动方不能再发送数据。</li><li>被动方收到<code>FIN</code>之后，返回<code>ACK</code>包给主动方，确认自己收到这个包，被动方状态变成<code>CLOSE_WAIT</code>，等待关闭连接(等待缓存数据都发送过去)</li><li>主动方收到<code>ACK</code>之后，状态变成<code>FIN_WAIT_2</code>，等待被动方的<code>FIN</code>包。</li><li>被动方将缓冲区剩余的数据发送给主动方。</li><li>被动方发送<code>FIN</code>给主动方，被动方状态变成<code>LAST_ACK</code>状态。</li><li>主动方收到<code>FIN</code>之后，返回<code>ACK</code>包给被动方，主动方变成<code>TIME_WAIT</code>状态。</li><li>被动方收到<code>ACK</code>确认后，变成<code>CLOSE</code>状态。</li><li>主动方在经过2<code>MSL</code>时间之后，变成<code>CLOSE</code>状态。</li></ol><blockquote><p>MSL(Maximum Segment Lifetime)指报文最大生存时间，它是任何报文在网络上存在的最长时间，超过这个时间报文将被丢弃。</p></blockquote><h3 id="为什么握手需要三次，而挥手需要四次？">为什么握手需要三次，而挥手需要四次？</h3><p>因为 <code>TCP</code>连接是全双工模式，一方断开连接，另一方还是可以继续发送数据，所以无法像三次握手一样，将 <code>FIN</code>和 <code>ACK</code>合并到一起，而是需要等待被动方处理完所有数据，不再有数据发送时，才会发送 <code>FIN</code>，来关闭被动方的连接。</p><h3 id="为什么需要-TIME-WAIT状态？">为什么需要 <code>TIME_WAIT</code>状态？</h3><p>需要 <code>TIME_WAIT</code> 状态，主要是两个原因：</p><ol><li>防止历史连接中的数据，被后面相同四元组的连接错误的接收：<br>在连接关闭过程中，可能会存在一些延迟的数据包在网络中，这些数据包可能在连接关闭后到达目的地。<code>TIME_WAIT</code> 状态的存在可以确保在这段时间内不会接收到与当前连接相关的旧数据包，防止这些数据包造成连接的混乱</li><li>保证「被动关闭连接」的一方，能被正确的关闭：<br>如果主动方收到 <code>FIN</code>，发出 <code>ACK</code>之后，直接进入 <code>CLOSE</code>状态，那么当这个 <code>ACK</code>丢失时，被动方收不到 <code>ACK</code>则会重发一个 <code>FIN</code>，但此时主动方已经是 <code>CLOSE</code>状态，无法再给被动方发送 <code>ACK</code>了。</li></ol><h3 id="如果两端同时关闭，会出现什么情况？">如果两端同时关闭，会出现什么情况？</h3><p>前面说过，<code>TCP</code>连接双方都可以主动断开，那如果两边同时断开，会怎样呢？<br><img src="/img/blog/tcp_close_in_the_same_time.png" alt="TCP同时断开"><br>从上图可以看到，一方发出<code>FIN</code>，进入<code>FIN_WAIT_1</code>状态，原本期待收到<code>ACK</code>，但此时收到了<code>FIN</code>，则会变成<code>CLOSING</code>状态，等到收到<code>ACK</code>时，再进入<code>TIME_WAIT</code>状态，同样要经过<code>2MSL</code>时间变成<code>CLOSE</code>状态。</p><h3 id="参考资料">参考资料</h3><ul><li><a href="https://www.xiaolincoding.com/network/3_tcp/tcp_interview.html#tcp-%E8%BF%9E%E6%8E%A5%E6%96%AD%E5%BC%80">TCP连接断开 - 小林coding</a></li></ul>]]></content>
+    
+    
+    
+  </entry>
+  
+  
+  
+  <entry>
     <title>TCP的三次握手过程</title>
     <link href="/the_three_way_handshake_of_TCP/"/>
     <url>/the_three_way_handshake_of_TCP/</url>
