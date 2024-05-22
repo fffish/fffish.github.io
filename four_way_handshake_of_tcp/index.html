@@ -26,8 +26,9 @@
 <meta property="og:image" content="https://blog.supersource.top/img/blog/four_way_handshake_of_TCP.png">
 <meta property="og:image" content="https://blog.supersource.top/img/blog/tcp_close_in_the_same_time.png">
 <meta property="article:published_time" content="2024-05-06T03:32:27.000Z">
-<meta property="article:modified_time" content="2024-05-06T06:47:34.474Z">
+<meta property="article:modified_time" content="2024-05-12T03:16:59.922Z">
 <meta property="article:author" content="看热闹的咸鱼">
+<meta property="article:tag" content="网络">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://blog.supersource.top/img/blog/four_way_handshake_of_TCP.png">
   
@@ -323,7 +324,7 @@
 <li>被动方发送<code>FIN</code>给主动方，被动方状态变成<code>LAST_ACK</code>状态。</li>
 <li>主动方收到<code>FIN</code>之后，返回<code>ACK</code>包给被动方，主动方变成<code>TIME_WAIT</code>状态。</li>
 <li>被动方收到<code>ACK</code>确认后，变成<code>CLOSE</code>状态。</li>
-<li>主动方在经过2<code>MSL</code>时间之后，变成<code>CLOSE</code>状态。</li>
+<li>主动方在经过<code>2MSL</code>时间之后，变成<code>CLOSE</code>状态。</li>
 </ol>
 <blockquote>
 <p>MSL(Maximum Segment Lifetime)指报文最大生存时间，它是任何报文在网络上存在的最长时间，超过这个时间报文将被丢弃。</p>
@@ -334,7 +335,7 @@
 <p>需要 <code>TIME_WAIT</code> 状态，主要是两个原因：</p>
 <ol>
 <li>防止历史连接中的数据，被后面相同四元组的连接错误的接收：<br>
-在连接关闭过程中，可能会存在一些延迟的数据包在网络中，这些数据包可能在连接关闭后到达目的地。<code>TIME_WAIT</code> 状态的存在可以确保在这段时间内不会接收到与当前连接相关的旧数据包，防止这些数据包造成连接的混乱</li>
+在连接关闭过程中，可能会存在一些延迟的数据包在网络中，这些数据包可能在连接关闭后到达目的地。<code>TIME_WAIT</code> 状态的存在可以确保在这段时间内不会接收到与当前连接相关的旧数据包，防止这些数据包造成连接的混乱。</li>
 <li>保证「被动关闭连接」的一方，能被正确的关闭：<br>
 如果主动方收到 <code>FIN</code>，发出 <code>ACK</code>之后，直接进入 <code>CLOSE</code>状态，那么当这个 <code>ACK</code>丢失时，被动方收不到 <code>ACK</code>则会重发一个 <code>FIN</code>，但此时主动方已经是 <code>CLOSE</code>状态，无法再给被动方发送 <code>ACK</code>了。</li>
 </ol>
@@ -354,6 +355,34 @@
             <div>
               <div class="post-metas my-3">
   
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E7%BD%91%E7%BB%9C/" class="category-chain-item">网络</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E7%BD%91%E7%BB%9C/" class="print-no-link">#网络</a>
+      
+    </div>
   
 </div>
 
@@ -407,6 +436,12 @@
                 <div class="post-prevnext my-3">
                   <article class="post-prev col-6">
                     
+                    
+                      <a href="/skynet_new_service/" title="skynet.newservice简介：服务的启动">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">skynet.newservice简介：服务的启动</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
                     
                   </article>
                   <article class="post-next col-6">
