@@ -16,26 +16,27 @@
   <meta name="author" content="看热闹的咸鱼">
   <meta name="keywords" content="">
   
-    <meta name="description" content="Nagle 算法（Nagle&#39;s Algorithm）和延迟确认（Delayed ACK）是两种用于提高 TCP 协议性能的机制。它们旨在减少网络中的小数据包数量，从而提高网络效率。然而，这两种机制有时也会相互影响，导致性能问题...">
+    <meta name="description" content="之前在讲解 TCP 的重传机制时提到过，TCP 每次发送数据，并不总是等到收到对方的 ACK 才继续发送下一条数据，而是会连接发送多个数据包。而这里能连接发送多少数据，则是由滑动窗口来控制的...">
 <meta property="og:type" content="article">
-<meta property="og:title" content="TCP:Nagle算法和延迟确认">
-<meta property="og:url" content="https://blog.supersource.top/TCP_Nagle_and_Delayed_ACK/index.html">
+<meta property="og:title" content="TCP的滑动窗口和拥塞控制">
+<meta property="og:url" content="https://blog.supersource.top/TCP_sliding_window_congestion_window/index.html">
 <meta property="og:site_name" content="每个人都有需要安静的时候">
-<meta property="og:description" content="Nagle 算法（Nagle&#39;s Algorithm）和延迟确认（Delayed ACK）是两种用于提高 TCP 协议性能的机制。它们旨在减少网络中的小数据包数量，从而提高网络效率。然而，这两种机制有时也会相互影响，导致性能问题...">
+<meta property="og:description" content="之前在讲解 TCP 的重传机制时提到过，TCP 每次发送数据，并不总是等到收到对方的 ACK 才继续发送下一条数据，而是会连接发送多个数据包。而这里能连接发送多少数据，则是由滑动窗口来控制的...">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://blog.supersource.top/img/blog/TCP_Nagle.png">
-<meta property="og:image" content="https://blog.supersource.top/img/blog/TCP_Nagle_wireshark.png">
-<meta property="og:image" content="https://blog.supersource.top/img/blog/TCP_Nagle_delay_ack.png">
-<meta property="article:published_time" content="2024-06-03T08:43:00.000Z">
-<meta property="article:modified_time" content="2024-06-03T11:35:40.008Z">
+<meta property="og:image" content="https://blog.supersource.top/img/blog/tcp_swnd.png">
+<meta property="og:image" content="https://blog.supersource.top/img/blog/tcp_rwnd.png">
+<meta property="og:image" content="https://blog.supersource.top/img/blog/tcp_slide_window.png">
+<meta property="og:image" content="https://blog.supersource.top/img/blog/tcp_slow_start.png">
+<meta property="article:published_time" content="2024-06-04T02:11:35.000Z">
+<meta property="article:modified_time" content="2024-07-15T11:28:54.637Z">
 <meta property="article:author" content="看热闹的咸鱼">
 <meta property="article:tag" content="网络">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://blog.supersource.top/img/blog/TCP_Nagle.png">
+<meta name="twitter:image" content="https://blog.supersource.top/img/blog/tcp_swnd.png">
   
   
   
-  <title>TCP:Nagle算法和延迟确认 - 每个人都有需要安静的时候</title>
+  <title>TCP的滑动窗口和拥塞控制 - 每个人都有需要安静的时候</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -230,7 +231,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="TCP:Nagle算法和延迟确认"></span>
+            <span id="subtitle" data-typed-text="TCP的滑动窗口和拥塞控制"></span>
           
         </div>
 
@@ -241,8 +242,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2024-06-03 16:43" pubdate>
-          2024年6月3日 下午
+        <time datetime="2024-06-04 10:11" pubdate>
+          2024年6月4日 上午
         </time>
       </span>
     
@@ -253,7 +254,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          826 字
+          2k 字
         
       </span>
     
@@ -264,7 +265,7 @@
         
         
         
-          7 分钟
+          17 分钟
         
       </span>
     
@@ -309,44 +310,104 @@
       <div class="container nopadding-x-md" id="board-ctn">
         <div id="board">
           <article class="post-content mx-auto">
-            <h1 id="seo-header">TCP:Nagle算法和延迟确认</h1>
+            <h1 id="seo-header">TCP的滑动窗口和拥塞控制</h1>
             
             
               <div class="markdown-body">
                 
-                <p>Nagle 算法（Nagle’s Algorithm）和延迟确认（Delayed ACK）是两种用于提高 TCP 协议性能的机制。它们旨在减少网络中的<strong>小数据包</strong>数量，从而提高网络效率。然而，这两种机制有时也会相互影响，导致性能问题。</p>
-<h3 id="Nagle算法">Nagle算法</h3>
-<p>Nagle算法作用于发送端，其目的在于通过减少小数据包的发送，来减少网络的拥塞。<br>
-在讲解<a href="https://blog.supersource.top/the_three_way_handshake_of_TCP/">TCP三次握手</a>的时候，我们提到TCP头部结构，其大小为20~60个字节。设想一下，如果我们要发送一个字节的数据，为了这一个字节，我们需要加上20字节的TCP头部，再加了20字节的IP头部，一共40字节的头部，就为了搭载这一个字节的数据，显得效率太低，于是就有了Nagle算法：</p>
+                <p>假如我们要从客户端发送数据到服务器，这个过程会是怎样的呢？<br>
+首先，当然是耳熟能详的<a href="https://blog.supersource.top/the_three_way_handshake_of_TCP/">三次握手过程</a>，那当连接建立之后，就一股脑发送所有数据吗？<br>
+当然不是，一下子发送太多数据，接收端可能没有那么大的空间，就浪费了流量。<br>
+TCP使用<strong>滑动窗口</strong>来管理发送方和接收方之间的数据传输量。滑动窗口通过控制未确认数据包的数量，确保发送方发出的包不会超出接收方的处理能力。</p>
+<h3 id="滑动窗口">滑动窗口</h3>
+<p>滑动窗口的工作机制如下：</p>
 <ul>
-<li>发送数据时，如果当前有<strong>尚未确认</strong>的数据(已发出数据但还没收到ACK)，则将数据缓存起来。</li>
-<li>当<strong>所有</strong>未确认的数据都被确认后，TCP会发送缓冲区中的数据。</li>
-<li>如果缓冲区的数据大于<code>MSS</code>时，也会直接发送缓冲区的数据。</li>
+<li>TCP在每个ACK包中，通知对方自己目前能接收多少数据，即TCP头部中的<strong>窗口大小</strong>(三次握手期间的ACK也会包含窗口大小)。</li>
+<li>发送方可以在这个<strong>窗口大小</strong>内，<strong>连续</strong>发送多个数据包，而不必等待每个数据包的确认。</li>
+<li>当发送方收到接收方的<code>ACK</code>确认，窗口就会向前滑动，允许发送方继续发送新的数据包。</li>
 </ul>
+<p>在某个时间段，发送方的TCP数据流如下图所示，可以分成4个部分：<br>
+<img src="/img/blog/tcp_swnd.png" srcset="/img/loading.gif" lazyload alt="image"></p>
+<ul>
+<li>已发送且已确认的数据：这部分数据已经没用了，不再需要保存。</li>
+<li>已发送但未确认的数据：需要保存在缓冲区里，如果丢包了，可以进行重传。</li>
+<li>未发送，允许发送的数据：没有超过接收方缓冲区，可以发送数据。</li>
+<li>未发送，不允许发送的数据：超过对方缓冲区，不可以发送。</li>
+</ul>
+<p>滑动窗口的优点：</p>
+<ul>
+<li>高效利用带宽：滑动窗口允许发送方连续发送多个数据包，而无需等待每个数据包的确认，从而提高了带宽利用率。</li>
+<li>流量控制：通过动态调整窗口大小，滑动窗口机制能有效控制数据流量，防止网络拥堵。</li>
+</ul>
+<h3 id="窗口满的情况">窗口满的情况</h3>
+<p>在接收方看来，数据可以分成三个部分：</p>
+<ul>
+<li>成功接收并确认的数据</li>
+<li>未收到但可以接收的数据</li>
+<li>未收到且不可接收的数据<br>
+<img src="/img/blog/tcp_rwnd.png" srcset="/img/loading.gif" lazyload alt="image"></li>
+</ul>
+<p>未收到但可以接收的部分，就是接收方的窗口大小。<br>
+接收方收到数据后，会存放到缓冲区中，等待上层应用获取数据(socket调用read函数)。<br>
+如果上层应用繁忙，读取效率较低，那么这个窗口就会慢慢变小，甚至会变成0，也就是窗口满的情况。<br>
+这时候，接收方会发送一个<code>ZeroWindow</code>的包，告诉发送方，这边已经不能再接收数据了，发送方就不再发送数据。<br>
+等到缓冲区的数据被读取之后，接收方会发一个<code>WindowUpdate</code>的ACK，告诉发送方自己最新的窗口大小，发送方就可以继续发送数据了。</p>
+<p>但是这里有个问题，如果这个<code>WindowUpdate</code>的包丢失了的话，发送方就只能继续保持0窗口，数据在这里就卡住不再发送了。<br>
+为了解决这个问题，TCP设置了定时探测，发送<code>ZeroWindowProbe</code>，获取接收端最新的窗口大小。<br>
+<img src="/img/blog/tcp_slide_window.png" srcset="/img/loading.gif" lazyload alt="image"></p>
 <blockquote>
-<p><code>MSS（Maxinum Segment Size）</code>指最大报文段长度，<code>MSS</code>的常见计算方式为 <code>MTU</code>（最大传输单元）减去20字节的TCP头部和20字节的IP头部，通常<code>MSS</code>值设置为<code>1460</code>字节。这个值有助于避免 IP 分片。</p>
+<p>TCP协议本身并没有一个明确的<code>Window Full</code>标记。然而，在实际使用中，有些网络监测工具和协议分析器（例如Wireshark）会标识或标记某些数据包，以表明发送方的发送窗口已经完全被使用。这种标记主要是用来帮助用户理解和分析TCP连接中的流量控制和拥塞控制情况。</p>
 </blockquote>
-<p><img src="/img/blog/TCP_Nagle.png" srcset="/img/loading.gif" lazyload alt=""><br>
-当启用Nagle算法的时候，我们发送多个小包，就会被合成一个大包，以及来减少网络中数据包的数量。但是，对于实时性要求较高的应用，这样做相当于带来延迟，并不适合。<br>
-<img src="/img/blog/TCP_Nagle_wireshark.png" srcset="/img/loading.gif" lazyload alt=""><br>
-我们可以通过设置<code>TCP_NODELAY</code>选项来关闭Nagle算法：</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-type">int</span> enable = <span class="hljs-number">1</span>;<br><span class="hljs-built_in">setsockopt</span>(sock, IPPROTO_TCP, TCP_NODELAY, &amp;enable, <span class="hljs-built_in">sizeof</span>(enable));<br></code></pre></td></tr></table></figure>
-<h3 id="延迟确认">延迟确认</h3>
-<p>Nagle算法是从发送端减少包的数据，而<strong>延迟确认</strong>则是从接收方的角度，通过减少<code>ACK</code>的数量，还达到减少网络拥塞的目的。</p>
+<h3 id="糊涂窗口综合症">糊涂窗口综合症</h3>
+<p>当接收方缓冲区满时，窗口关闭，如果应用层读取了一个字节的数据，此时缓冲区就有了一个字节的空间，这时候立刻发送<code>WindowUpdate</code>通知发送方的话，那发送方就可能发一个字节的数据过来，一个TCP包只包含一个字节的数据，这效率就很低下。<br>
+这种情况下，这个连接的窗口一直保持在很小的状态，称作<code>糊涂窗口综合症</code>。<br>
+为了解决这个问题，当<code>窗口大小</code>小于<code>min(MSS，缓存空间/2)</code> ，也就是小于<code>MSS</code>与<code>1/2</code>缓存大小中的最小值时，就会向发送方通告窗口为 0，也就阻止了发送方再发数据过来。<br>
+等到接收方处理了一些数据后，窗口大小 &gt;= MSS，或者接收方缓存空间有一半可以使用，才更新窗口大小，让发送方发送数据过来。</p>
+<h3 id="拥塞控制">拥塞控制</h3>
+<p>滑动窗口控制的是一个TCP连接的流量，避免发送方的数据填满接收方的缓存。但是，网络上不只一个TCP连接，如果不加以控制的话，就可能发生数据的拥堵，拥堵导致丢包，丢包需要重传，则又加大了拥堵。<br>
+所以，TCP使用了<strong>拥塞控制</strong>来避免数据填满整个网络。</p>
+<p><strong>拥塞窗口 cwnd</strong> 是发送方维护的一个的状态变量，它会根据<strong>网络的拥塞程度动态变化的</strong> 。当<code>cwnd=n</code>时，表示发送方可以发送<code>n</code>个<code>MSS</code>大小的数据</p>
+<p>拥塞控制主要是四个算法：</p>
 <ul>
-<li>当<code>TCP</code>收到数据包后，不立即发送<code>ACK</code>，而是等待一小段时间（通常是 200 毫秒）。</li>
-<li>在这个等待时间内，如果有数据需要发送，则将<code>ACK</code>和数据一起发送，这样可以减少单独的<code>ACK</code>包。</li>
-<li>在这个等待时间内，如果收到第二份数据，则发送<code>ACK</code>。</li>
-<li>如果等待时间到期，还没有数据要发送，则发送<code>ACK</code>。</li>
+<li>慢启动</li>
+<li>拥塞避免</li>
+<li>快速重传</li>
+<li>快速恢复</li>
 </ul>
-<p>TCP 连接中，客户端发送数据包，服务器收到后，如果立即发送 ACK，网络中会有大量的 ACK 包。启用延迟确认后，服务器在接收数据包后会等待一段时间，如果在这段时间内客户端继续发送数据，服务器可以一起确认多个数据包，减少 ACK 包数量。</p>
-<h3 id="Nagle算法和延迟确认导致的性能问题">Nagle算法和延迟确认导致的性能问题</h3>
-<p>Nagle在发送数据的环节增加了延迟，而延迟确认在接收的环节增加了延迟，如果发送方一直发小包，而接收方也没有数据返回的时候，可能会造成更多的延迟：<br>
-<img src="/img/blog/TCP_Nagle_delay_ack.png" srcset="/img/loading.gif" lazyload alt=""><br>
-所以，在对延迟比较敏感的应用中，通常会关闭<code>Nagle</code>算法，来提高延迟。</p>
-<h4 id="参考资料">参考资料</h4>
+<h4 id="慢启动">慢启动</h4>
+<p>慢启动的思路就是，不要一开始就发送大量的数据，先探测一下网络的拥塞程度，也就是说由小到大逐渐增加<code>cwnd</code>的大小，其算法如下：</p>
+<ol>
+<li>建立连接后，初始化<code>cwnd</code>为<code>1</code>，可以发送1个<code>MSS</code>数据。</li>
+<li>每次收到<code>ACK</code>，则将<code>cwnd</code>加1。</li>
+<li><code>cwnd</code>达到某一个阈值<code>ssthresh</code>（slow start threshold）后，不再使用慢启动，改用<strong>拥塞避免</strong>算法。</li>
+</ol>
+<p><img src="/img/blog/tcp_slow_start.png" srcset="/img/loading.gif" lazyload alt="image"><br>
+从上图中，可以看到，每一个<code>rtt</code>时间，<code>cwnd</code>都会翻倍，从而快速地增长。在良好的网络环境下，可以很快达到阈值，进入<strong>拥塞避免</strong>算法。</p>
+<blockquote>
+<p>在一些现代操作系统中（如 Linux 和 Windows），TCP 初始拥塞窗口的默认值为 10 个 MSS。这使得发送方在建立连接后的初始数据传输中，可以一次发送多达 10 个 MSS 的数据包，而不必经历传统的慢启动阶段。</p>
+</blockquote>
+<h4 id="拥塞避免">拥塞避免</h4>
+<p>慢启动时，起点低，但指数增长，速度快，达到一定程度后，就不能再继续指数增长，以防止拥塞。拥塞避免的想法就是，在一个<code>rtt</code>时间内，让<code>cwnd</code>不是翻倍，而是加一，缓慢增长。<br>
+那么，如何让<code>cwnd</code>在一个<code>rtt</code>中加一呢？在<strong>慢启动</strong>算法中，在某一轮次，<code>cwnd=n</code>，此时连续发送<code>n</code>个<code>MSS</code>，每次收到<code>ACK</code>则<code>cwnd+1</code>，收到<code>n</code>个则<code>cwnd+n</code>，形成翻倍的效果。同理，只要在每次收到<code>ACK</code>时，将<code>cwnd+1</code>改成<code>cwnd+1/n</code>，那么在<code>n</code>个<code>ACK</code>后，则形成<code>cwnd+1</code>的结果。</p>
+<p>在慢启动和拥塞避免阶段，如果出现超时，则重发超时的数据，然后处理如下：</p>
 <ul>
-<li><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Nagle%27s_algorithm">维基百科-Nagle算法</a></li>
+<li>将<code>ssthresh</code>设为<code>cwnd/2</code></li>
+<li>将<code>cwnd</code>设为1</li>
+<li>进入<strong>慢启动</strong>算法</li>
+</ul>
+<h4 id="快速重传">快速重传</h4>
+<p>当检测是否丢包时，每次都要等待超时的发生，会浪费很长时间，因此引入了<strong>快速重传</strong>：发送方只要收到3个重复的<code>ACK</code>，即认为丢包发生，此时会立即重传丢失的包，而不再等待超时的出现。</p>
+<h4 id="快速恢复">快速恢复</h4>
+<p>为了解决丢包后进入<strong>慢启动</strong>引起的效率降低，在<strong>快速重传</strong>的基础上，又引入了<strong>快速恢复</strong>，在发生快速重传之后，拥塞控制如下处理：</p>
+<ul>
+<li>将<code>ssthresh</code>设为<code>cwnd/2</code>。</li>
+<li>将<code>cwnd</code>设为<code>ssthresh+3</code>（+3是因为已经收到3个重复的ACK）。</li>
+<li>如果再收到重复的ACK，则<code>cwnd+1</code>。</li>
+<li>如果收到新的ACK，则快速恢复结束，进入<strong>拥塞避免</strong>。</li>
+</ul>
+<h3 id="参考资料">参考资料</h3>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/612561398">知乎 - 笔记：滑动窗口</a></li>
 </ul>
 
                 
@@ -393,8 +454,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>TCP:Nagle算法和延迟确认</div>
-      <div>https://blog.supersource.top/TCP_Nagle_and_Delayed_ACK/</div>
+      <div>TCP的滑动窗口和拥塞控制</div>
+      <div>https://blog.supersource.top/TCP_sliding_window_congestion_window/</div>
     </div>
     <div class="license-meta">
       
@@ -406,7 +467,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>发布于</div>
-          <div>2024年6月3日</div>
+          <div>2024年6月4日</div>
         </div>
       
       
@@ -438,9 +499,9 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/TCP_sliding_window_congestion_window/" title="TCP的滑动窗口和拥塞控制">
+                      <a href="/windows_port_forward/" title="windows实现端口转发">
                         <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">TCP的滑动窗口和拥塞控制</span>
+                        <span class="hidden-mobile">windows实现端口转发</span>
                         <span class="visible-mobile">上一篇</span>
                       </a>
                     
@@ -448,8 +509,8 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/TCP_retransmission_mechanism/" title="TCP的重传机制">
-                        <span class="hidden-mobile">TCP的重传机制</span>
+                      <a href="/TCP_Nagle_and_Delayed_ACK/" title="TCP:Nagle算法和延迟确认">
+                        <span class="hidden-mobile">TCP:Nagle算法和延迟确认</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
