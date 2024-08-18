@@ -28,7 +28,7 @@
 <meta property="og:image" content="https://blog.supersource.top/img/blog/tcp_slide_window.png">
 <meta property="og:image" content="https://blog.supersource.top/img/blog/tcp_slow_start.png">
 <meta property="article:published_time" content="2024-06-04T02:11:35.000Z">
-<meta property="article:modified_time" content="2024-07-15T11:28:54.637Z">
+<meta property="article:modified_time" content="2024-07-18T16:25:55.383Z">
 <meta property="article:author" content="看热闹的咸鱼">
 <meta property="article:tag" content="网络">
 <meta name="twitter:card" content="summary_large_image">
@@ -315,7 +315,7 @@
             
               <div class="markdown-body">
                 
-                <p>假如我们要从客户端发送数据到服务器，这个过程会是怎样的呢？<br>
+                <p>当我们使用TCP，从客户端发送数据到服务器，这个过程会是怎样的呢？<br>
 首先，当然是耳熟能详的<a href="https://blog.supersource.top/the_three_way_handshake_of_TCP/">三次握手过程</a>，那当连接建立之后，就一股脑发送所有数据吗？<br>
 当然不是，一下子发送太多数据，接收端可能没有那么大的空间，就浪费了流量。<br>
 TCP使用<strong>滑动窗口</strong>来管理发送方和接收方之间的数据传输量。滑动窗口通过控制未确认数据包的数量，确保发送方发出的包不会超出接收方的处理能力。</p>

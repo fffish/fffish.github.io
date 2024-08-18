@@ -25,7 +25,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://blog.supersource.top/img/blog/skynet_inject.png">
 <meta property="article:published_time" content="2024-07-12T11:43:52.000Z">
-<meta property="article:modified_time" content="2024-07-16T07:59:35.868Z">
+<meta property="article:modified_time" content="2024-07-27T09:53:56.943Z">
 <meta property="article:author" content="看热闹的咸鱼">
 <meta property="article:tag" content="游戏服务器">
 <meta property="article:tag" content="skynet">
@@ -377,7 +377,7 @@
 <li>设置环境，调用传入的热更新文件。现在我们知道，在上面的例子中的<code>hotfix.lua</code>，用到的<code>_P</code>，就是存放各种消息类型的处理函数的upValue表。</li>
 </ol>
 <blockquote>
-<p>在控制台调用inject指令时，还可以传入额外的参数，例如：<code>inject :0000000a services/hotfix.lua xxx yyy</code>，最终这两个参数，就是这里的<code>inject</code>函数中的第四个参数<code>args</code>。</p>
+<p>在控制台调用inject指令时，还可以传入额外的参数，例如：<code>inject :0000000a services/hotfix.lua xxx yyy</code>，最终这两个参数，就是这里的<code>inject</code>函数中的第四个参数<code>args</code>，可以在<code>hotfix.lua</code>中直接使用这两参数。</p>
 </blockquote>
 
                 
@@ -475,8 +475,8 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/skynet_call_and_send/" title="skynet的消息发送：call和send">
-                        <span class="hidden-mobile">skynet的消息发送：call和send</span>
+                      <a href="/skynet_call_and_send/" title="skynet的消息发送：send和call">
+                        <span class="hidden-mobile">skynet的消息发送：send和call</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
