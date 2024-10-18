@@ -1,3 +1,4 @@
+https://blog.supersource.top/redis_cluster_use_docker/
 https://blog.supersource.top/skip_list_in_redis/
 https://blog.supersource.top/redis_cluster_slot/
 https://blog.supersource.top/implementing_rank_using_redis/
@@ -20,7 +21,6 @@ https://blog.supersource.top/four_way_handshake_of_tcp/
 https://blog.supersource.top/the_three_way_handshake_of_TCP/
 https://blog.supersource.top/skynet_main_service_bootstrap/
 https://blog.supersource.top/largest_accurately_integer_in_double_type/
-https://blog.supersource.top/redis_cluster_use_docker/
 https://blog.supersource.top/qsort/
 https://blog.supersource.top/insertion_sort/
 https://blog.supersource.top/merge_sort/
@@ -34,7 +34,6 @@ https://blog.supersource.top/tags/%E7%BD%91%E7%BB%9C/
 https://blog.supersource.top/tags/%E6%B8%B8%E6%88%8F%E6%9C%8D%E5%8A%A1%E5%99%A8/
 https://blog.supersource.top/tags/skynet/
 https://blog.supersource.top/tags/lua/
-https://blog.supersource.top/tags/redis/
 https://blog.supersource.top/tags/%E6%B8%B8%E6%88%8F%E5%BC%80%E5%8F%91/
 https://blog.supersource.top/tags/%E7%AE%97%E6%B3%95/
 https://blog.supersource.top/categories/MySQL/
@@ -42,5 +41,4 @@ https://blog.supersource.top/categories/PHP/
 https://blog.supersource.top/categories/Redis/
 https://blog.supersource.top/categories/%E7%BD%91%E7%BB%9C/
 https://blog.supersource.top/categories/skynet/
-https://blog.supersource.top/categories/redis/
 https://blog.supersource.top/categories/%E7%AE%97%E6%B3%95/
