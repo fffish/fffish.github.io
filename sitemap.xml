@@ -2,6 +2,15 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://blog.supersource.top/php_traits/</loc>
+    
+    <lastmod>2024-10-18</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>https://blog.supersource.top/skynet_cluster/</loc>
     
     <lastmod>2024-10-18</lastmod>
@@ -261,6 +270,13 @@
   </url>
   
   <url>
+    <loc>https://blog.supersource.top/tags/PHP/</loc>
+    <lastmod>2024-10-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
     <loc>https://blog.supersource.top/tags/redis/</loc>
     <lastmod>2024-10-18</lastmod>
     <changefreq>weekly</changefreq>
@@ -276,13 +292,6 @@
   
   <url>
     <loc>https://blog.supersource.top/tags/%E7%BD%91%E7%BB%9C/</loc>
-    <lastmod>2024-10-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://blog.supersource.top/tags/PHP/</loc>
     <lastmod>2024-10-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -327,6 +336,13 @@
   
   <url>
     <loc>https://blog.supersource.top/categories/MySQL/</loc>
+    <lastmod>2024-10-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://blog.supersource.top/categories/PHP/</loc>
     <lastmod>2024-10-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
