@@ -1,0 +1,908 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/icon.jpg">
+  <link rel="icon" href="/img/icon.jpg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="看热闹的咸鱼">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="现在的游戏服务器框架中，分布式是一种常见的需求。一个游戏服务器组通常可以分成网关服务器、登录服务器、逻辑服务器、跨服服务器等等。在skynet中，我们可以通过cluster来组建一个集群，实现分布式的部署...">
+<meta property="og:type" content="article">
+<meta property="og:title" content="skynet的cluster集群">
+<meta property="og:url" content="https://blog.supersource.top/skynet_cluster/index.html">
+<meta property="og:site_name" content="每个人都有需要安静的时候">
+<meta property="og:description" content="现在的游戏服务器框架中，分布式是一种常见的需求。一个游戏服务器组通常可以分成网关服务器、登录服务器、逻辑服务器、跨服服务器等等。在skynet中，我们可以通过cluster来组建一个集群，实现分布式的部署...">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://blog.supersource.top/files/img/cluster_node.png">
+<meta property="og:image" content="https://blog.supersource.top/files/img/cluster_clusterd.png">
+<meta property="og:image" content="https://blog.supersource.top/files/img/cluster_topic.png">
+<meta property="article:published_time" content="2024-10-11T11:32:11.000Z">
+<meta property="article:modified_time" content="2024-10-18T08:48:48.182Z">
+<meta property="article:author" content="看热闹的咸鱼">
+<meta property="article:tag" content="游戏服务器">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://blog.supersource.top/files/img/cluster_node.png">
+  
+  
+  
+  <title>skynet的cluster集群 - 每个人都有需要安静的时候</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"blog.supersource.top","root":"/","version":"1.9.7","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"889KZdux1EO9gdRMRKsm6ERQ-MdYXbMMI","app_key":"YsMghHExWqBY3xXUBW4kt4An","server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+  
+
+  
+    <!-- Google tag (gtag.js) -->
+    <script async>
+      if (!Fluid.ctx.dnt) {
+        Fluid.utils.createScript("https://www.googletagmanager.com/gtag/js?id=", function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag() {
+            dataLayer.push(arguments);
+          }
+          gtag('js', new Date());
+          gtag('config', '');
+        });
+      }
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+  
+<meta name="generator" content="Hexo 5.4.2"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>L&amp;C</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/banner1.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="skynet的cluster集群"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2024-10-11 19:32" pubdate>
+          2024年10月11日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          3.2k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          27 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="leancloud-page-views-container" class="post-meta" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="leancloud-page-views"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">skynet的cluster集群</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h2 id="集群的使用">集群的使用</h2>
+<p>现在的游戏服务器框架中，分布式是一种常见的需求。一个游戏服务器组通常可以分成<strong>网关服务器、登录服务器、逻辑服务器、跨服服务器</strong>等等。<br>
+在<code>skynet</code>中，我们可以通过<code>cluster</code>来组建一个集群，实现分布式的部署。</p>
+<h3 id="示例">示例</h3>
+<p>我们先来看一个简单的例子，在这里我们实现了两个<code>skynet</code>结点(进程)：一个称为<code>center</code>，一个称为<code>game</code>。<br>
+在<code>center</code>中启动一个<code>data</code>服务，然后<code>game</code>结点向<code>center</code>结点的<code>data</code>服务获取数据。<br>
+<img src="/files/img/cluster_node.png" srcset="/img/loading.gif" lazyload alt="img"><br>
+<code>center</code>结点有两个文件<code>centerMain</code>和<code>dataService</code>：</p>
+<figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs lua"><span class="hljs-comment">--centerMain.lua</span><br><span class="hljs-keyword">local</span> skynet = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;skynet&quot;</span>)<br><span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;skynet.manager&quot;</span>)<br><span class="hljs-keyword">local</span> cluster = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;skynet.cluster&quot;</span>)<br><br>skynet.start(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span></span><br>   <span class="hljs-comment">--打开结点：表示当前进程是center结点，监听center端口</span><br>   cluster.<span class="hljs-built_in">open</span>(<span class="hljs-string">&quot;center&quot;</span>)<br><br>   <span class="hljs-comment">--启动dataService服务</span><br>   <span class="hljs-keyword">local</span> addr = skynet.newservice(<span class="hljs-string">&quot;dataService&quot;</span>)<br><br>   <span class="hljs-comment">--注册名字，以便其他结点访问</span><br>   skynet.name(<span class="hljs-string">&quot;.dataService&quot;</span>, addr)<br><span class="hljs-keyword">end</span>)<br></code></pre></td></tr></table></figure>
+<figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs lua"><span class="hljs-comment">--dataService.lua</span><br><span class="hljs-keyword">local</span> skynet = <span class="hljs-built_in">require</span> <span class="hljs-string">&quot;skynet&quot;</span><br><span class="hljs-keyword">local</span> kv = &#123;&#125;<br><br>skynet.start(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span></span><br>   skynet.dispatch(<span class="hljs-string">&quot;lua&quot;</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(session, source, cmd, k, v)</span></span><br>      <span class="hljs-keyword">if</span> cmd == <span class="hljs-string">&quot;set&quot;</span> <span class="hljs-keyword">then</span><br>         kv[k] = v<br>      <span class="hljs-keyword">elseif</span> cmd == <span class="hljs-string">&quot;get&quot;</span> <span class="hljs-keyword">then</span><br>         skynet.retpack(kv[k])<br>      <span class="hljs-keyword">end</span><br>   <span class="hljs-keyword">end</span>)<br><span class="hljs-keyword">end</span>)<br></code></pre></td></tr></table></figure>
+<p><code>game</code>结点连接<code>center</code>结点，访问<code>dataService</code>服务：</p>
+<figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs lua"><span class="hljs-keyword">local</span> skynet = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;skynet&quot;</span>)<br><span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;skynet.manager&quot;</span>)<br><span class="hljs-keyword">local</span> cluster = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;skynet.cluster&quot;</span>)<br><br>skynet.start(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span></span><br>   <span class="hljs-comment">--使用cluster.send/call</span><br>   cluster.send(<span class="hljs-string">&quot;center&quot;</span>, <span class="hljs-string">&quot;.data&quot;</span>, <span class="hljs-string">&quot;set&quot;</span>, <span class="hljs-string">&quot;k1&quot;</span>, <span class="hljs-string">&quot;v1&quot;</span>)<br>   <span class="hljs-built_in">print</span>(cluster.call(<span class="hljs-string">&quot;center&quot;</span>, <span class="hljs-string">&quot;.data&quot;</span>, <span class="hljs-string">&quot;get&quot;</span>, <span class="hljs-string">&quot;k1&quot;</span>))<br><br>   <span class="hljs-comment">--使用skynet.send/call</span><br>   <span class="hljs-keyword">local</span> addr = cluster.proxy(<span class="hljs-string">&quot;center&quot;</span>, <span class="hljs-string">&quot;.data&quot;</span>)<br>   skynet.send(addr, <span class="hljs-string">&quot;lua&quot;</span>, <span class="hljs-string">&quot;set&quot;</span>, <span class="hljs-string">&quot;k1&quot;</span>, <span class="hljs-string">&quot;v2&quot;</span>)<br>   <span class="hljs-built_in">print</span>(skynet.call(addr, <span class="hljs-string">&quot;lua&quot;</span>, <span class="hljs-string">&quot;get&quot;</span>, <span class="hljs-string">&quot;k1&quot;</span>))<br><span class="hljs-keyword">end</span>)<br></code></pre></td></tr></table></figure>
+<p>在配置文件中，我们需要指定一个<code>cluster</code>文件：</p>
+<figure class="highlight abnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs abnf">--config<br><span class="hljs-attribute">cluster</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;./config/clusterConfig.lua&quot;</span><br><br>--config/clusterConfig.lua<br>__nowaiting <span class="hljs-operator">=</span> true <br><span class="hljs-attribute">center</span><span class="hljs-operator">=</span><span class="hljs-string">&quot;127.0.0.1:14880&quot;</span><br><span class="hljs-attribute">game</span><span class="hljs-operator">=</span><span class="hljs-string">&quot;127.0.0.1:14881&quot;</span><br></code></pre></td></tr></table></figure>
+<p>这样一个简单的<code>skynet</code>集群就搭建好了</p>
+<h3 id="cluster库"><code>cluster</code>库</h3>
+<p>在示例中，我们看到集群的监听和发送，都是通过<code>cluster</code>这个库来操作的。<code>cluster</code>是一个封装的用来进行集群相关操作的函数库，通过<code>local cluster = require(&quot;skynet.cluster&quot;)</code>引入<br>
+主要的函数有：</p>
+<h4 id="1-cluster-reload">1. cluster.reload</h4>
+<p><code>cluster.reload</code>用来加载配置。除了通过配置文件之外，我们也可以使用<code>cluster.reload</code>来加载配置：</p>
+<figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs lua">cluster.reload(&#123;<br>   center=<span class="hljs-string">&quot;127.0.0.1:14880&quot;</span>,<br>   game=<span class="hljs-string">&quot;127.0.0.1:14881&quot;</span>,<br>&#125;)<br></code></pre></td></tr></table></figure>
+<p>如果不传参数的话，则表示重新从配置文件中加载：</p>
+<figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs lua">cluster.reload()<br></code></pre></td></tr></table></figure>
+<blockquote>
+<p><code>reload</code>是新加配置，对于旧的结点，如果没有被覆盖到则没有影响。想要清除旧的结点，可以配置<code>node=nil</code></p>
+</blockquote>
+<blockquote>
+<p>可以通过配置节点名字对应的地址为 false 来明确指出这个节点已经下线</p>
+</blockquote>
+<h4 id="2-cluster-open">2. cluster.open</h4>
+<p><code>cluster.open</code>表示监听指定的端口。示例中，在<code>center</code>结点，我们使用<code>cluster.open('center')</code>来监听<code>center</code>端口，在这里是监听<code>127.0.0.1:14880</code>。</p>
+<p>这里会发一条<code>listen</code>指令给到<code>clusterd</code>，<code>clusterd</code>启动<code>gate</code>服务，并通过<code>gate</code>服务来监听端口。</p>
+<blockquote>
+<p><code>clusterd</code>在收到<code>listen</code>时，会启动一个<code>gate</code>服务，所以如果你有自定义的网关服务，最好不要用<code>gate</code>这个服务名。</p>
+</blockquote>
+<p>在一个进程里，我们可以<code>open</code>多个端口，如果其他结点不会主动连接本结点，那也可以不<code>open</code>任何端口。</p>
+<h4 id="3-cluster-send-cluster-call">3. cluster.send / cluster.call</h4>
+<p><code>send</code>和<code>call</code>可以向指定的结点发送<code>lua</code>消息。<br>
+其效果和在目标结点上，发送<code>lua</code>消息一样。<br>
+在<code>game</code>结点上执行：<br>
+<code>cluster.send(&quot;center&quot;, &quot;.dataService&quot;, &quot;set&quot;, &quot;k1&quot;, &quot;v1&quot;)</code><br>
+相当于在<code>center</code>结点上执行：<br>
+<code>skynet.send(&quot;.dataService&quot;, &quot;lua&quot;, &quot;set&quot;, &quot;k1&quot;, &quot;v1&quot;)</code></p>
+<h4 id="4-cluster-proxy">4. cluster.proxy</h4>
+<p><code>cluster.proxy</code>用于生成一个代理地址，使发送跨结点的消息看起来和发送本地消息一样:</p>
+<figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs lua"><span class="hljs-keyword">local</span> addr = cluster.proxy(<span class="hljs-string">&#x27;center&#x27;</span>, <span class="hljs-string">&#x27;.dataService&#x27;</span>)<br>skynet.send(addr, <span class="hljs-string">&#x27;lua&#x27;</span>, <span class="hljs-string">&#x27;set&#x27;</span>, <span class="hljs-string">&#x27;k1&#x27;</span>, <span class="hljs-string">&#x27;v1&#x27;</span>)<br></code></pre></td></tr></table></figure>
+<blockquote>
+<p>和发送本地消息的区别在于，这种方式下，skynet.send只能支持lua消息。</p>
+</blockquote>
+<h4 id="5-cluster-register-cluster-query">5. cluster.register / cluster.query</h4>
+<p><code>cluster.register</code>用于给某个服务在当前结点注册个名字。<br>
+其他结点，则可以使用<code>cluster.query</code>来判断目标结点是否存在某个服务。</p>
+<h3 id="clusterd服务"><code>clusterd</code>服务</h3>
+<p>当我们引入<code>cluster</code>库时，会启动一个唯一服务<code>clusterd</code>，这是在<code>cluster.lua</code>文件中，通过<code>skynet.init</code>的方式启动的：</p>
+<figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs lua"><span class="hljs-comment">--cluster.lua</span><br>skynet.init(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span></span><br>    clusterd = skynet.uniqueservice(<span class="hljs-string">&quot;clusterd&quot;</span>)<br><span class="hljs-keyword">end</span>)<br></code></pre></td></tr></table></figure>
+<p><code>cluster</code>库的函数，基本上都是通过发送<code>lua</code>消息到<code>clusterd</code>服务来进行的。<br>
+<img src="/files/img/cluster_clusterd.png" srcset="/img/loading.gif" lazyload alt="img"><br>
+<code>clusterd</code>会处理以下<code>lua</code>消息：</p>
+<h4 id="1-reload">1. reload</h4>
+<p><code>clusterd</code>维护一个<code>node_address</code>表，用来记录每个结点对应的IP地址和端口。</p>
+<h4 id="2-listen">2. listen</h4>
+<p>收到<code>listen</code>消息时，<code>clusterd</code>会启动一个<code>gate</code>服务。然后根据结点名，获取结点地址，启动<code>gate</code>监听网络端口。<br>
+当这个<code>gate</code>服务收到网络连接时，会发送<code>lua</code>消息<code>socket</code>到<code>clusterd</code>服务，然后由<code>clusterd</code>启动一个<code>clusteragent</code>服务，来处理这个连接的消息：</p>
+<figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs lua"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">command.socket</span><span class="hljs-params">(source, subcmd, fd, msg)</span></span><br>	<span class="hljs-keyword">if</span> subcmd == <span class="hljs-string">&quot;open&quot;</span> <span class="hljs-keyword">then</span><br>		skynet.<span class="hljs-built_in">error</span>(<span class="hljs-built_in">string</span>.<span class="hljs-built_in">format</span>(<span class="hljs-string">&quot;socket accept from %s&quot;</span>, msg))<br>		<span class="hljs-comment">-- new cluster agent</span><br>		cluster_agent[fd] = <span class="hljs-literal">false</span><br>		<span class="hljs-keyword">local</span> agent = skynet.newservice(<span class="hljs-string">&quot;clusteragent&quot;</span>, skynet.<span class="hljs-built_in">self</span>(), source, fd)<br>		<span class="hljs-comment">--...其他代码</span><br>	<span class="hljs-keyword">else</span><br>		<span class="hljs-comment">--...关闭和错误处理</span><br>	<span class="hljs-keyword">end</span><br><span class="hljs-keyword">end</span><br></code></pre></td></tr></table></figure>
+<h4 id="3-register">3. register</h4>
+<p><code>clusterd</code>维护一个<code>register_name</code>表，用来记录注册的服务名和地址。</p>
+<h4 id="4-proxy">4. proxy</h4>
+<p><code>clusterd</code>维护一个<code>proxy</code>表，记录<code>结点名.服务名</code>对应的代理地址，当代理地址不存在时，则创建一个<code>clusterproxy</code>服务。</p>
+<h4 id="5-sender">5. sender</h4>
+<p><code>clusterd</code>维护一个<code>node_channel</code>表，记录结点对应的<code>clustersender</code>地址，这里会返回结点对应的<code>clustersender</code>地址，没有则先创建一个。</p>
+<h3 id="发送消息到其他结点">发送消息到其他结点</h3>
+<ul>
+<li><code>cluster.send</code><br>
+<code>cluster.send</code>会通过一个<code>clustersender</code>服务来发送消息。先看看代码：</li>
+</ul>
+<figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs lua"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">cluster.send</span><span class="hljs-params">(node, address, ...)</span></span><br>	<span class="hljs-comment">-- push is the same with req, but no response</span><br>	<span class="hljs-keyword">local</span> s = sender[node]<br>	<span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> s <span class="hljs-keyword">then</span><br>		<span class="hljs-built_in">table</span>.<span class="hljs-built_in">insert</span>(task_queue[node], skynet.packstring(address, ...))<br>	<span class="hljs-keyword">else</span><br>		skynet.send(sender[node], <span class="hljs-string">&quot;lua&quot;</span>, <span class="hljs-string">&quot;push&quot;</span>, address, skynet.pack(...))<br>	<span class="hljs-keyword">end</span><br><span class="hljs-keyword">end</span><br></code></pre></td></tr></table></figure>
+<p>在<code>cluster</code>中维护着<code>sender</code>列表，在同一个服务里，<code>sender</code>记录每个<code>node</code>对应的<code>clustersender</code>服务。<br>
+当<code>sender[node]</code>不存在的时候，没有直接创建一个<code>clustersender</code>，而是将当前的参数打包，然后插入到一个<code>task_queue</code>队列中，这是因为创建服务是一个阻塞的过程，在创建服务的过程中，可能会再次调用<code>cluster.send</code>，所以这里将所有创建过程中的参数都缓存起来，等<code>clustersender</code>创建完成后，再统一发送到目标结点。<br>
+而创建<code>clustersender</code>，又是发送消息到<code>clusterd</code>服务：<code>local ok, c = pcall(skynet.call, clusterd, &quot;lua&quot;, &quot;sender&quot;, node)</code></p>
+<blockquote>
+<p><code>skynet.packstring</code>可以将多个参数(字符串，数字，表，布尔值)序列化成一个字符串。可以使用<code>skynet.unpack</code>反序列化将参数解出。</p>
+</blockquote>
+<ul>
+<li><code>cluster.call</code><br>
+<code>cluster.call</code>同样是通过<code>clustersender</code>服务来发送消息。</li>
+</ul>
+<figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs lua"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">cluster.call</span><span class="hljs-params">(node, address, ...)</span></span><br>	<span class="hljs-comment">-- skynet.pack(...) will free by cluster.core.packrequest</span><br>	<span class="hljs-keyword">local</span> s = sender[node]<br>	<span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> s <span class="hljs-keyword">then</span><br>		<span class="hljs-keyword">local</span> task = skynet.packstring(address, ...)<br>		<span class="hljs-keyword">return</span> skynet.call(get_sender(node), <span class="hljs-string">&quot;lua&quot;</span>, <span class="hljs-string">&quot;req&quot;</span>, repack(skynet.<span class="hljs-built_in">unpack</span>(task)))<br>	<span class="hljs-keyword">end</span><br>	<span class="hljs-keyword">return</span> skynet.call(s, <span class="hljs-string">&quot;lua&quot;</span>, <span class="hljs-string">&quot;req&quot;</span>, address, skynet.pack(...))<br><span class="hljs-keyword">end</span><br></code></pre></td></tr></table></figure>
+<p><code>cluster.send</code>使用<code>task_queue</code>可以立刻返回，不会阻塞，而<code>cluster.call</code>本身就是会阻塞的，所以可以直接使用<code>get_sender</code>，以阻塞的形式获取一个<code>clustersender</code>。</p>
+<p>注意这里先将参数序列化，等获取到<code>sender</code>之后才重新化序列化，这是因为<code>get_sender</code>这个过程是阻塞的，而参数有可能是个<code>table</code>，在阻塞的过程中，这个<code>table</code>中的值有可能发生变化，导致逻辑不符合预期，所以这里通过序列化来保证发送时的参数不会被改变。</p>
+<h3 id="clustersender服务"><code>clustersender</code>服务</h3>
+<p><code>clustersender</code>用来连接指定结点并发送数据。这个服务是在第一次发送数据时才创建的。<br>
+在集群中，结点A向结点B发送过消息，那么结点A就有一个指向结点B的<code>clustersender</code>服务，<strong>且只有一个</strong>。</p>
+<blockquote>
+<p><code>clustersender</code>服务是在<code>clusterd</code>服务中创建的，<code>clusterd</code>是一个唯一服务，在这个服务的管理下，每个目标结点只有一个<code>clustersender</code>服务。</p>
+</blockquote>
+<p>现在我们来看看<code>clustersender</code>服务是怎么发送数据的。</p>
+<p>启动服务时，我们传过来四个参数<br>
+<code>node</code>: 连接的集群的结点名字<br>
+<code>nodename</code>: 主机的hostname<br>
+<code>init_host</code>: <code>socket</code>连接的地址<br>
+<code>init_port</code>: <code>socket</code>连接的端口</p>
+<p>在<code>skynet.start</code>时，创建了一个<code>skynet.socketchannel</code>，然后设置<code>lua</code>消息处理函数，这里主要处理两种服务：</p>
+<ul>
+<li><code>push</code><br>
+<code>push</code>对应的是<code>cluster.send</code>，只负责发送，不需要响应。</li>
+</ul>
+<figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs lua"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">command.push</span><span class="hljs-params">(addr, msg, sz)</span></span><br>	<span class="hljs-keyword">local</span> request, new_session, padding = cluster.packpush(addr, session, msg, sz)<br>	<span class="hljs-keyword">if</span> padding <span class="hljs-keyword">then</span>	<span class="hljs-comment">-- is multi push</span><br>		session = new_session<br>	<span class="hljs-keyword">end</span><br><br>	channel:request(request, <span class="hljs-literal">nil</span>, padding)<br><span class="hljs-keyword">end</span><br></code></pre></td></tr></table></figure>
+<p>这里的<code>cluster</code>的<code>C</code>层的库，不是<code>lua</code>层的库。<br>
+<code>cluster.packpush</code>按特定的协议，来打包数据。<br>
+<code>cluster.packpush</code>返回三个值：<br>
+<code>request</code>：打包后的二进制数据。<br>
+<code>new_session</code>：<code>session+1</code>。<br>
+<code>padding</code>：如果数据过大，则将超过单包上限的二进制数据以<code>table</code>数组的形式放在<code>padding</code>里。</p>
+<p><code>channel:request</code>则是将<code>request</code>发送给对端主机，如果有<code>padding</code>，则分多个包发出去。这里第二个参数是<code>response</code>，这里为<code>nil</code>表示不需要响应。</p>
+<ul>
+<li><code>req</code><br>
+<code>req</code>对应的是<code>cluster.call</code>，需要等待响应的返回。</li>
+</ul>
+<figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><code class="hljs lua"><span class="hljs-keyword">local</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">send_request</span><span class="hljs-params">(addr, msg, sz)</span></span><br>	<span class="hljs-comment">-- msg is a local pointer, cluster.packrequest will free it</span><br>	<span class="hljs-keyword">local</span> current_session = session<br>	<span class="hljs-keyword">local</span> request, new_session, padding = cluster.packrequest(addr, session, msg, sz)<br>	session = new_session<br><br>	<span class="hljs-keyword">local</span> tracetag = skynet.tracetag()<br>	<span class="hljs-keyword">if</span> tracetag <span class="hljs-keyword">then</span><br>		<span class="hljs-keyword">if</span> tracetag:<span class="hljs-built_in">sub</span>(<span class="hljs-number">1</span>,<span class="hljs-number">1</span>) ~= <span class="hljs-string">&quot;(&quot;</span> <span class="hljs-keyword">then</span><br>			<span class="hljs-comment">-- add nodename</span><br>			<span class="hljs-keyword">local</span> newtag = <span class="hljs-built_in">string</span>.<span class="hljs-built_in">format</span>(<span class="hljs-string">&quot;(%s-%s-%d)%s&quot;</span>, nodename, node, session, tracetag)<br>			skynet.tracelog(tracetag, <span class="hljs-built_in">string</span>.<span class="hljs-built_in">format</span>(<span class="hljs-string">&quot;session %s&quot;</span>, newtag))<br>			tracetag = newtag<br>		<span class="hljs-keyword">end</span><br>		skynet.tracelog(tracetag, <span class="hljs-built_in">string</span>.<span class="hljs-built_in">format</span>(<span class="hljs-string">&quot;cluster %s&quot;</span>, node))<br>		channel:request(cluster.packtrace(tracetag))<br>	<span class="hljs-keyword">end</span><br>	<span class="hljs-keyword">return</span> channel:request(request, current_session, padding)<br><span class="hljs-keyword">end</span><br><br><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">command.req</span><span class="hljs-params">(...)</span></span><br>	<span class="hljs-keyword">local</span> ok, msg = <span class="hljs-built_in">pcall</span>(send_request, ...)<br>	<span class="hljs-keyword">if</span> ok <span class="hljs-keyword">then</span><br>		<span class="hljs-keyword">if</span> <span class="hljs-built_in">type</span>(msg) == <span class="hljs-string">&quot;table&quot;</span> <span class="hljs-keyword">then</span><br>			skynet.ret(cluster.<span class="hljs-built_in">concat</span>(msg))<br>		<span class="hljs-keyword">else</span><br>			skynet.ret(msg)<br>		<span class="hljs-keyword">end</span><br>	<span class="hljs-keyword">else</span><br>		skynet.<span class="hljs-built_in">error</span>(msg)<br>		skynet.response()(<span class="hljs-literal">false</span>)<br>	<span class="hljs-keyword">end</span><br><span class="hljs-keyword">end</span><br></code></pre></td></tr></table></figure>
+<p><code>command.req</code>调用<code>send_request</code>，返回值如果是<code>table</code>表示这是一个大包切割成多个小包，需要使用<code>cluster.concat</code>连接起来再返回，如果是<code>string</code>则直接返回。<br>
+在<code>send_request</code>中，<code>cluster.packrequest</code>和<code>cluster.packpush</code>类似，来打包<code>request</code>类型的数据。<br>
+最后同样是交给<code>channel:request</code>来发送<code>socket</code>消息，和<code>push</code>不同的是，这里第二个参数传入了<code>current_session</code>，表示接收响应的会话ID。</p>
+<p>这里简单的讲一下<code>channel:request</code>是怎么发送和接收数据的。<br>
+<code>channel:request</code>首先会检查当前的连接状态：</p>
+<ul>
+<li>如果<code>socket</code>连接还没建立，则先建立连接，再发送数据；</li>
+<li>如果<code>socket</code>连接已断开，则会抛出异常；</li>
+<li>如果<code>socket</code>连接正常，则直接发送数据。<br>
+在发送数据的时候，如果数据包太大(超过<code>32K</code>)，则会切分成多个包来发送。</li>
+</ul>
+<p>如果需要等待响应数据，那么会调用<code>socketchannel</code>的<code>__response</code>函数，这个函数是在<code>socketchannel</code>初始化的时候传入的，在<code>socketsender</code>这里，则是<code>read_response</code>函数：</p>
+<figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs lua"><span class="hljs-keyword">local</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">read_response</span><span class="hljs-params">(sock)</span></span><br>	<span class="hljs-keyword">local</span> sz = socket.header(sock:<span class="hljs-built_in">read</span>(<span class="hljs-number">2</span>))<br>	<span class="hljs-keyword">local</span> msg = sock:<span class="hljs-built_in">read</span>(sz)<br>	<span class="hljs-keyword">return</span> cluster.unpackresponse(msg)	<span class="hljs-comment">-- session, ok, data, padding</span><br><span class="hljs-keyword">end</span><br><br>skynet.start(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span></span><br>	channel = sc.channel &#123;<br>			host = init_host,<br>			port = <span class="hljs-built_in">tonumber</span>(init_port),<br>			response = read_response,<br>			nodelay = <span class="hljs-literal">true</span>,<br>		&#125;<br>	skynet.dispatch(<span class="hljs-string">&quot;lua&quot;</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(session , source, cmd, ...)</span></span><br>		<span class="hljs-keyword">local</span> f = <span class="hljs-built_in">assert</span>(command[cmd])<br>		f(...)<br>	<span class="hljs-keyword">end</span>)<br><span class="hljs-keyword">end</span>)<br></code></pre></td></tr></table></figure>
+<p><code>read_response</code>中，<code>sock:read</code>是一个阻塞函数，接收对端<code>socket</code>传回来的网络消息。</p>
+<h3 id="clsteragent服务"><code>clsteragent</code>服务</h3>
+<p>前面提到过，当<code>clustersender</code>第一次发送数据时，会先建立<code>socket</code>连接，而当<code>socket</code>连接建立时，对面的结点会创建一个<code>clusteragent</code>服务，来处理收到的数据。<br>
+<code>clusteragent</code>的创建是在<code>clusterd</code>服务中：</p>
+<figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs lua"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">command.socket</span><span class="hljs-params">(source, subcmd, fd, msg)</span></span><br>	<span class="hljs-keyword">if</span> subcmd == <span class="hljs-string">&quot;open&quot;</span> <span class="hljs-keyword">then</span><br>		skynet.<span class="hljs-built_in">error</span>(<span class="hljs-built_in">string</span>.<span class="hljs-built_in">format</span>(<span class="hljs-string">&quot;socket accept from %s&quot;</span>, msg))<br>		<span class="hljs-comment">-- new cluster agent</span><br>		cluster_agent[fd] = <span class="hljs-literal">false</span><br>		<span class="hljs-keyword">local</span> agent = skynet.newservice(<span class="hljs-string">&quot;clusteragent&quot;</span>, skynet.<span class="hljs-built_in">self</span>(), source, fd)<br>        <span class="hljs-comment">--...其他代码</span><br>	<span class="hljs-keyword">else</span><br>        <span class="hljs-comment">--...其他代码</span><br>	<span class="hljs-keyword">end</span><br><span class="hljs-keyword">end</span><br></code></pre></td></tr></table></figure>
+<p>可以看到，创建<code>clusteragent</code>的时候，传入了三个参数：<code>clusterd</code>地址、<code>source</code>地址(即<code>gate</code>地址)、<code>fd</code>文件描述符(代表这个<code>socket</code>)。<br>
+<code>clusteragent</code>在调用<code>skynet.start</code>的时候，设置<code>gate</code>服务的转发，将来自<code>fd</code>的网络消息，都转发到这个<code>clusteragent</code>地址，然后设置了对网络消息的处理：</p>
+<figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs lua">skynet.register_protocol &#123;<br>    name = <span class="hljs-string">&quot;client&quot;</span>,<br>    id = skynet.PTYPE_CLIENT,<br>    <span class="hljs-built_in">unpack</span> = cluster.unpackrequest,<br>    dispatch = dispatch_request,<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>这里的<code>cluster.unpackrequest</code>将<code>clustersender</code>传过来的网络数据进行解析，然后分配给<code>dispatch_request</code>处理：<br>
+<code>dispatch_request(_,_,addr, session, msg, sz, padding, is_push)</code><br>
+<code>clustersender</code>中会将服务地址<code>addr</code>打包，这里将<code>addr</code>解析出来，<code>addr</code>可以是字符串，也可以是数字。<br>
+当<code>addr</code>是数字<code>0</code>的时候，表示查询某个注册名字的数字地址：</p>
+<figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs lua"><span class="hljs-comment">--结点A</span><br>cluster.register(<span class="hljs-string">&quot;name&quot;</span>, addr)<br><br><span class="hljs-comment">--结点B</span><br><span class="hljs-keyword">local</span> addr = cluster.call(<span class="hljs-string">&quot;NodeA&quot;</span>, <span class="hljs-number">0</span>, <span class="hljs-string">&quot;name&quot;</span>) <span class="hljs-comment">--返回NodeA中注册的&quot;name&quot;的数字地址</span><br></code></pre></td></tr></table></figure>
+<p>当<code>addr</code>是字符串或大于0的数字，则判断<code>addr</code>是不是通过<code>cluster.register</code>注册过的，如果是则<code>addr</code>转化成注册的地址。 然后再根据<code>is_push</code>，来执行<code>skynet.rawcall</code>或<code>skynet.rawsend</code>，进行数据转发。 如果是<code>call</code>，最后还需要将数据通过<code>socket</code>返回给<code>clustersender</code>。</p>
+<h3 id="clusterproxy服务">clusterproxy服务</h3>
+<p>当我们调用<code>cluster.proxy(node, addr)</code>时，会向<code>clusterd</code>申请一个<code>clusterproxy</code>服务。<br>
+这里的参数，有三种形式：</p>
+<ul>
+<li>cluster.proxy(“center”, “.data”)</li>
+<li>cluster.proxy(“center.addr”) ：等价于 cluster.proxy(“center”, “.data”)</li>
+<li>cluster.proxy(“center@addr”) ：等价于 cluster.proxy(“center”, “@data”)<br>
+<code>clusterd</code>会以<code>node .. &quot;.&quot; .. name</code>作为<code>key</code>，保证同一个<code>key</code>只有一个<code>clusterproxy</code>服务。</li>
+</ul>
+<p>而<code>clusterproxy</code>服务很简单：<br>
+它会向<code>clusterd</code>申请一个面向<code>node</code>的<code>clustersender</code>，然后就收到的<code>lua</code>消息，转发到这个<code>clustersender</code>上，参数使用服务初始化时的<code>addr</code>。<br>
+<img src="/files/img/cluster_topic.png" srcset="/img/loading.gif" lazyload alt="img"></p>
+<h3 id="参考资料">参考资料</h3>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/cloudwu/skynet/wiki/Cluster#cluster-mode">github skynet wiki</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.codingnow.com/2017/03/skynet_cluster.html">skynet cluster 模块的设计与编码协议</a></li>
+</ul>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/skynet/" class="category-chain-item">skynet</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E6%B8%B8%E6%88%8F%E6%9C%8D%E5%8A%A1%E5%99%A8/" class="print-no-link">#游戏服务器</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>skynet的cluster集群</div>
+      <div>https://blog.supersource.top/skynet_cluster/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>看热闹的咸鱼</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2024年10月11日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/php_traits/" title="PHP模拟多继承的方式：traits">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">PHP模拟多继承的方式：traits</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/skynet_hotfix_by_inject/" title="skynet热更新之inject">
+                        <span class="hidden-mobile">skynet热更新之inject</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  
+  
+    <article id="comments" lazyload>
+      
+  <div id="waline"></div>
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#waline', function() {
+      Fluid.utils.createCssLink('https://cdn.staticfile.org/waline/2.15.5/waline.min.css')
+      Fluid.utils.createScript('https://cdn.staticfile.org/waline/2.15.5/waline.min.js', function() {
+        var options = Object.assign(
+          {"serverURL":"https://blog-comment-black.vercel.app/","path":"window.location.pathname","meta":["nick","mail","link"],"requiredMeta":["nick"],"lang":"zh-CN","emoji":["https://cdn.jsdelivr.net/gh/walinejs/emojis/weibo"],"dark":"html[data-user-color-scheme=\"dark\"]","wordLimit":0,"pageSize":10},
+          {
+            el: '#waline',
+            path: window.location.pathname
+          }
+        )
+        Waline.init(options);
+        Fluid.utils.waitElementVisible('#waline .vcontent', () => {
+          var imgSelector = '#waline .vcontent img:not(.vemoji)';
+          Fluid.plugins.imageCaption(imgSelector);
+          Fluid.plugins.fancyBox(imgSelector);
+        })
+      });
+    });
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+    </article>
+  
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="leancloud-site-pv-container" style="display: none">
+        总访问量 
+        <span id="leancloud-site-pv"></span>
+         次
+      </span>
+    
+    
+      <span id="leancloud-site-uv-container" style="display: none">
+        总访客数 
+        <span id="leancloud-site-uv"></span>
+         人
+      </span>
+    
+    
+
+  
+</div>
+
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script defer src="/js/leancloud.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

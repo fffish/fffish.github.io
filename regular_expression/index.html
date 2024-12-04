@@ -1,0 +1,956 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/icon.jpg">
+  <link rel="icon" href="/img/icon.jpg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="看热闹的咸鱼">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="正则表达式（regular expression）是一组用来匹配模式的字符串，通过定义规则，来实现字符串的查找、替换和验证。举个例子，你可以用正则表达式来查找一段字符串中的数字；再比如说，可以将字符串中符合规则的子串替换成另外的字符；又或者，用正则表达式来验证用户输入的密码是否符合某种规范...">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PHP正则表达式简介">
+<meta property="og:url" content="https://blog.supersource.top/regular_expression/index.html">
+<meta property="og:site_name" content="每个人都有需要安静的时候">
+<meta property="og:description" content="正则表达式（regular expression）是一组用来匹配模式的字符串，通过定义规则，来实现字符串的查找、替换和验证。举个例子，你可以用正则表达式来查找一段字符串中的数字；再比如说，可以将字符串中符合规则的子串替换成另外的字符；又或者，用正则表达式来验证用户输入的密码是否符合某种规范...">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-06-05T16:53:20.000Z">
+<meta property="article:modified_time" content="2024-10-18T09:23:58.015Z">
+<meta property="article:author" content="看热闹的咸鱼">
+<meta property="article:tag" content="PHP">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>PHP正则表达式简介 - 每个人都有需要安静的时候</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"blog.supersource.top","root":"/","version":"1.9.7","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"889KZdux1EO9gdRMRKsm6ERQ-MdYXbMMI","app_key":"YsMghHExWqBY3xXUBW4kt4An","server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+  
+
+  
+    <!-- Google tag (gtag.js) -->
+    <script async>
+      if (!Fluid.ctx.dnt) {
+        Fluid.utils.createScript("https://www.googletagmanager.com/gtag/js?id=", function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag() {
+            dataLayer.push(arguments);
+          }
+          gtag('js', new Date());
+          gtag('config', '');
+        });
+      }
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+  
+<meta name="generator" content="Hexo 5.4.2"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>L&amp;C</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/banner1.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="PHP正则表达式简介"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2022-06-06 00:53" pubdate>
+          2022年6月6日 凌晨
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          2.5k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          22 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="leancloud-page-views-container" class="post-meta" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="leancloud-page-views"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">PHP正则表达式简介</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h3 id="1-什么是正则表达式">1. 什么是正则表达式</h3>
+<p><strong>正则表达式</strong>（regular expression）是一组用来匹配模式的字符串，通过定义规则，来实现字符串的<strong>查找、替换和验证</strong>。举个例子，你可以用正则表达式来查找一段字符串中的数字；再比如说，可以将字符串中符合规则的子串替换成另外的字符；又或者，用正则表达式来验证用户输入的密码是否符合某种规范（比如长度6-8个字符，同时包含大小写字母和数字）。</p>
+<p>不同语言的正则表达式有不同的语法，不过大体上都有<strong>普通字符、限定符、元字符、转义符号、修饰符</strong>等概念，下面简单讲解一下PHP中的正则表达式。</p>
+<!-- more -->
+<h3 id="2-PHP的正则表达式">2.PHP的正则表达式</h3>
+<p>我们先看看一个简单的模式，<code>/https?/i</code>，其中，<code>/</code>表示分隔符，两个<code>/</code>中间的部分就是匹配的规则。最后面的<code>i</code>是修饰符，在这里表示<strong>不匹分大小写</strong>，修饰符不是必需的。<code>https</code>属于普通符号，<code>\d</code>属于元字符，代表着<strong>数字0-9</strong></p>
+<h6 id="2-1-分隔符">2.1 分隔符</h6>
+<p>常用的分隔符是正斜线(/)，但除了字母、数字、空格、以及反斜线(\)外，其他符号都可以用作分隔符。比如：</p>
+<p><code>/http:\/\//</code><br>
+<code>#http:\\#</code></p>
+<p>都是合法的PHP模式。可以看到，在模式中使用到分隔符的时候，必须用转义字符进行转义。所以如果分隔符经常在正则模式内出现，可以使用其他分隔符以便提高可读性。</p>
+<h6 id="2-2-元字符">2.2 元字符</h6>
+<p>正则表达式的强大源于它可以在模式中拥有选择和重复的能力。一些字符被赋予特殊的涵义，这些字符就是<strong>元字符</strong>。PHP中的元字符有以下这些：</p>
+<table>
+<thead>
+<tr>
+<th>元字符</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>\</td>
+<td>用于转义</td>
+</tr>
+<tr>
+<td>^</td>
+<td>匹配输入字符串的开始位置(或在多行模式下是行首)</td>
+</tr>
+<tr>
+<td>$</td>
+<td>匹配输入字符串的结束位置(或在多行模式下是行尾)</td>
+</tr>
+<tr>
+<td>.</td>
+<td>匹配除换行符外的任何字符(默认)</td>
+</tr>
+<tr>
+<td>[</td>
+<td>开始字符类定义</td>
+</tr>
+<tr>
+<td>]</td>
+<td>结束字符类定义</td>
+</tr>
+<tr>
+<td>|</td>
+<td>开始一个可选分支</td>
+</tr>
+<tr>
+<td>(</td>
+<td>子组的开始标记</td>
+</tr>
+<tr>
+<td>)</td>
+<td>子组的结束标记</td>
+</tr>
+<tr>
+<td>?</td>
+<td>作为量词，表示 0 次或 1 次匹配。位于量词后面用于改变量词的贪婪特性。</td>
+</tr>
+<tr>
+<td>*</td>
+<td>量词，0 次或多次匹配</td>
+</tr>
+<tr>
+<td>+</td>
+<td>量词，1 次或多次匹配</td>
+</tr>
+<tr>
+<td>{</td>
+<td>自定义量词开始标记</td>
+</tr>
+<tr>
+<td>}</td>
+<td>自定义量词结束标记</td>
+</tr>
+</tbody>
+</table>
+<p>在模式中，方括号<code>[]</code>内的部分称为<strong>字符类</strong>,表示一些字符的合集。在这一部分，有另外的元字符定义：</p>
+<table>
+<thead>
+<tr>
+<th>元字符</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>|转义字符</td>
+<td></td>
+</tr>
+<tr>
+<td>^</td>
+<td>仅在作为第一个字符(方括号内)时，表明字符类取反</td>
+</tr>
+<tr>
+<td>-</td>
+<td>标记字符范围</td>
+</tr>
+</tbody>
+</table>
+<p>举个例子，<code>/[a-z0-9,]/</code>表示所有小写字母和数字和逗号，<code>[^a-z,]</code>表示除了小写字母和逗号之外的所有字符。</p>
+<h6 id="2-3-转义序列（反斜线）">2.3 转义序列（反斜线）</h6>
+<p>反斜线<code>\</code>通常的作用是转义，即表明取消该字符所代表的特殊涵义。比如上面提到的元字符<code>*</code>，如果要匹配到星号<code>*</code>，而不是表示0或多次匹配，则可以写成<code>\*</code>，反斜线在这里就起到转义作用。<br>
+　　<code>\</code>的第二个作用，是用来表示非打印字符，比如换行符<code>\n</code>，制表符<code>\t</code>等等。<br>
+　　对于<code>\</code>的另一个重要的作用，则是用来描述特定的字符类：</p>
+<table>
+<thead>
+<tr>
+<th>字符</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>\d</td>
+<td>任意十进制数字</td>
+</tr>
+<tr>
+<td>\D</td>
+<td>任意非十进制数字</td>
+</tr>
+<tr>
+<td>\w</td>
+<td>任意单词字符(字母、数字、下划线)</td>
+</tr>
+<tr>
+<td>\W</td>
+<td>任意非单词字符</td>
+</tr>
+<tr>
+<td>\s</td>
+<td>任意空白字符</td>
+</tr>
+<tr>
+<td>\S</td>
+<td>任意非空白字符</td>
+</tr>
+</tbody>
+</table>
+<h6 id="2-4-量词">2.4 量词</h6>
+<p>量词用于表示重复多次匹配，格式为<code>&#123;数字1,数字2&#125;</code>，其中两个数值都必须小于 65536， 并且第一个数字必须小于等于第二个。如果数字2被省略<code>&#123;数字1,&#125;</code>，则表示没有大限。如果连逗号都被省略<code>&#123;数字1&#125;</code>，则表示确定次数的匹配。<br>
+　　举例说明，<code>/a&#123;3,8&#125;/</code>表示匹配连续的3-8个a，<code>/a&#123;3,&#125;/</code>表示匹配大于等于3个a，<code>/a&#123;3&#125;/</code>表示匹配刚好3个a。常用的<code>*</code>,<code>+</code>,<code>?</code>分别等价于<code>&#123;0,&#125;</code>,<code>&#123;1,&#125;</code>,<code>&#123;0,1&#125;</code></p>
+<p>默认情况下，量词都是“贪婪”的，也就是说， 它们会在不导致模式匹配失败的前提下，尽可能多的匹配字符。然而，如果一个量词紧跟着一个 ?(问号) 标记，它就会成为懒惰(非贪婪)模式， 它不再尽可能多的匹配，而是尽可能少的匹配。<br>
+　　例如，<code>/&lt;(.*)&gt;/</code>去匹配<code>&lt;head&gt;&lt;/head&gt;</code>会匹配到整个字符串，<code>.*</code>捕获出来的是<code>head&gt;&lt;/head</code>，而<code>/&lt;(.*?)&gt;/</code>去匹配<code>&lt;head&gt;&lt;/head&gt;</code>只会匹配到前面的<code>&lt;head&gt;</code>，<code>.*?</code>捕获到的是<code>head</code>。</p>
+<h6 id="2-5-修饰符">2.5 修饰符</h6>
+<p>在分隔符后面，可以加修饰符，常用的修饰符有：</p>
+<table>
+<thead>
+<tr>
+<th>符号</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>i</td>
+<td>不区分大小写</td>
+</tr>
+<tr>
+<td>s</td>
+<td>模式中的圆点符号<code>.</code>匹配所有的字符，包括换行符</td>
+</tr>
+<tr>
+<td>m</td>
+<td>匹配多行，使<code>^</code>、<code>$</code>分别匹配到每一行的行首和行尾</td>
+</tr>
+</tbody>
+</table>
+<p>例如<code>/abc/i</code>可以匹配到<code>abc</code>，<code>Abc</code>，<code>ABC</code>等字符串。</p>
+<h6 id="2-6-子组和可选路径以及后向引用">2.6 子组和可选路径以及后向引用</h6>
+<p>圆括号<code>()</code>中的部分即为子组，可以用来捕获其中的内容，也可以在其中加上<code>|</code>形成可选路径。比如<code>/cat(abc)+/</code>中<code>abc</code>为一个整体，可以匹配到<code>catabc</code>，<code>catabcabc</code>等。如果没有括号的话，<code>/catabc+/</code>就只能匹配到<code>catabccc</code>之类的字符串。再比如，<code>/cat(abc|def)/</code>中，<code>|</code>将子组分成两个可选的部分，能匹配到<code>catabc</code>，<code>catdef</code>两个字符串。值得注意的是，<code>|</code>可以为空的字符串，比如<code>/cat(abc|def|)/</code>可以匹配到<code>catabc</code>，<code>catdef</code>，<code>cat</code>三个字符串。<br>
+　　圆括号<code>()</code>中匹配到的内容，可以在后面通过<code>反斜杠+数字</code>的方式进行引用，这称之为后向引用。举例说明，<code>/(\d&#123;2&#125;)=\1/</code>可以匹配到<code>13=13</code>，<code>/(\d&#123;2&#125;)(\d&#123;2&#125;)=\2\1/</code>可以匹配到<code>1234=3412</code>，这里面<code>\1</code>，<code>\2</code>表示前面捕获到的第1、第2个子组。<br>
+　　如果想要在括号里只表示分组，而不需要捕获，可以在左括号后面紧跟字符串 <code>?:</code>，例如<code>/(?:\d&#123;2&#125;)(\d&#123;2&#125;)=\1/</code>中只会捕获到后面括号的一组内容，所以后面只能跟<code>\1</code>，可以匹配到<code>1234=34</code>这样的字符串。</p>
+<h3 id="3-PHP的正则表达式的函数">3. PHP的正则表达式的函数</h3>
+<h6 id="3-1-preg-match">3.1 preg_match</h6>
+<p><code>preg_match</code>用于执行匹配正则表达式。其函数原型为：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-title function_ invoke__">preg_match</span>(<span class="hljs-variable">$pattern</span>,<span class="hljs-variable">$subject</span> [, &amp;<span class="hljs-variable">$matches</span> [, <span class="hljs-variable">$flags</span> = <span class="hljs-number">0</span> [, <span class="hljs-variable">$offset</span> = <span class="hljs-number">0</span> ]]])<br></code></pre></td></tr></table></figure>
+<p>参数说明如下：</p>
+<ul>
+<li>pattern : 要搜索的模式，字符串类型。</li>
+<li>subject : 输入字符串。</li>
+<li>matches : 可选参数，会被填充为搜索结果。其中<code>matches[0]</code>将包含完整模式匹配到的文本， <code>matches[1]</code> 将包含第一个捕获子组匹配到的文本，以此类推。</li>
+<li>flags : 可选参数，$flags 可以被设置为 PREG_OFFSET_CAPTURE，如果传递了这个标记，对于每一个出现的匹配，返回时都会附加上字符串偏移量（相对于目标字符串的）；</li>
+<li>offset : 可选参数，用于指定从目标字符串的某个位置开始搜索(单位是字节)。</li>
+</ul>
+<p><code>preg_match</code>函数返回匹配次数，它的值将是0次（不匹配）或 1 次，因为<code>preg_match</code>在第一次匹配后将会停止搜索。</p>
+<p>【示例】使用 preg_match() 函数搜索一个字符串。</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-keyword">echo</span> <span class="hljs-title function_ invoke__">preg_match</span>(<span class="hljs-string">&#x27;/([a-z])(\d&#123;6&#125;)/&#x27;</span>, <span class="hljs-string">&quot;a123456,b654321&quot;</span>,<span class="hljs-variable">$output</span>);<br><span class="hljs-title function_ invoke__">print_r</span>(<span class="hljs-variable">$output</span>);<br></code></pre></td></tr></table></figure>
+<p>输出结果为：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-number">1</span>Array<br>(<br>    [<span class="hljs-number">0</span>] =&gt; a123456<br>    [<span class="hljs-number">1</span>] =&gt; a<br>    [<span class="hljs-number">2</span>] =&gt; <span class="hljs-number">123456</span><br>)<br></code></pre></td></tr></table></figure>
+<p>可以看到<code>preg_match</code>在匹配到一次后就结束了。如果想匹配到所有的话，可以使用<code>preg_match_all</code>。</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-keyword">echo</span> <span class="hljs-title function_ invoke__">preg_match_all</span>(<span class="hljs-string">&#x27;/([a-z])(\d&#123;6&#125;)/&#x27;</span>, <span class="hljs-string">&quot;a123456,b654321&quot;</span>,<span class="hljs-variable">$output</span>);<br><span class="hljs-title function_ invoke__">print_r</span>(<span class="hljs-variable">$output</span>);<br></code></pre></td></tr></table></figure>
+<p>输出结果为：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-number">2</span>Array<br>(<br>    [<span class="hljs-number">0</span>] =&gt; <span class="hljs-title function_ invoke__">Array</span><br>        (<br>            [<span class="hljs-number">0</span>] =&gt; a123456<br>            [<span class="hljs-number">1</span>] =&gt; b654321<br>        )<br><br>    [<span class="hljs-number">1</span>] =&gt; <span class="hljs-title function_ invoke__">Array</span><br>        (<br>            [<span class="hljs-number">0</span>] =&gt; a<br>            [<span class="hljs-number">1</span>] =&gt; b<br>        )<br><br>    [<span class="hljs-number">2</span>] =&gt; <span class="hljs-title function_ invoke__">Array</span><br>        (<br>            [<span class="hljs-number">0</span>] =&gt; <span class="hljs-number">123456</span><br>            [<span class="hljs-number">1</span>] =&gt; <span class="hljs-number">654321</span><br>        )<br>)<br></code></pre></td></tr></table></figure>
+<h6 id="3-2-preg-replace">3.2 preg_replace</h6>
+<p><code>preg_replace</code>用于执行一个正则表达式的搜索和替换。其函数原型为：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-title function_ invoke__">preg_replace</span>(<span class="hljs-variable">$pattern</span>, <span class="hljs-variable">$replacement</span>, <span class="hljs-variable">$subject</span> [, <span class="hljs-variable">$limit</span> = -<span class="hljs-number">1</span> [, &amp;<span class="hljs-variable">$count</span>]])<br></code></pre></td></tr></table></figure>
+<p>参数说明如下：</p>
+<ul>
+<li>pattern : 要搜索的模式。可以使一个字符串或字符串数组。</li>
+<li>replacement : 用于替换的字符串或字符串数组。如果这个参数是一个字符串，并且 pattern 是一个数组，那么所有的模式都使用这个字符串进行替换。如果 pattern 和 replacement 都是数组，每个 pattern 使用 replacement 中对应的元素进行替换。如果 replacement 中的元素比 pattern 中的少，多出来的 pattern 使用空字符串进行替换。</li>
+<li>subject : 要进行搜索和替换的字符串或字符串数组。</li>
+<li>limit : 可选参数，每个模式在每个 subject 上进行替换的最大次数。默认是 -1(无限)。</li>
+<li>count : 可选参数，如果指定，将会被填充为完成的替换次数。</li>
+</ul>
+<p>如果 subject 是一个数组，preg_replace() 返回一个数组，其他情况下返回一个字符串。</p>
+<p>如果匹配被查找到，替换后的 subject 被返回，其他情况下返回没有改变的 subject。如果发生错误，返回 null 。</p>
+<p>【示例】</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-comment">//把数字替换成*号</span><br><span class="hljs-keyword">echo</span> <span class="hljs-title function_ invoke__">preg_replace</span>(<span class="hljs-string">&quot;/\d/&quot;</span>,<span class="hljs-string">&quot;*&quot;</span>,<span class="hljs-string">&quot;abc123&quot;</span>); <span class="hljs-comment">//输出 abc***</span><br><span class="hljs-comment">//把[]替换成&#123;&#125;</span><br><span class="hljs-keyword">echo</span> <span class="hljs-title function_ invoke__">preg_replace</span>([<span class="hljs-string">&quot;/\[/&quot;</span>,<span class="hljs-string">&quot;/\]/&quot;</span>],[<span class="hljs-string">&quot;&#123;&quot;</span>,<span class="hljs-string">&quot;&#125;&quot;</span>],<span class="hljs-string">&quot;[abc]&quot;</span>); <span class="hljs-comment">//输出 &#123;abc&#125;</span><br><span class="hljs-comment">//把=两边互换</span><br><span class="hljs-keyword">echo</span> <span class="hljs-title function_ invoke__">preg_replace</span>(<span class="hljs-string">&quot;/(.*)=(.*)/&quot;</span>, <span class="hljs-string">&quot;<span class="hljs-subst">$2</span>=<span class="hljs-subst">$1</span>&quot;</span>, <span class="hljs-string">&quot;key=val&quot;</span>); <span class="hljs-comment">//输出 val=key</span><br></code></pre></td></tr></table></figure>
+<hr>
+<p><strong><strong>【写在最后】</strong></strong><br>
+正则表达式虽好，但也不必要凡事尽皆正则。如果你仅仅想要检查某个字符串是否包含另外一个字符串，不要使用<code>preg_match</code>，使用<code>strpos</code>会更快。若凡是看到字符串就想正则，就会像这么一个段子：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs">我遇到了一个问题，我觉得可以用正则表达式来解决。好了，我现在有两个问题了。<br></code></pre></td></tr></table></figure>
+<h4 id="参考">参考</h4>
+<ul>
+<li>[1] <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Regular_expression">Wikipedia</a></li>
+<li>[2] <a target="_blank" rel="noopener" href="https://www.runoob.com/regexp/regexp-tutorial.html">runoob正则表达式教程</a></li>
+<li>[3] <a target="_blank" rel="noopener" href="https://www.php.net/manual/zh/regexp.introduction.php">php官方文档-PCRE正则语法</a></li>
+</ul>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/PHP/" class="category-chain-item">PHP</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/PHP/" class="print-no-link">#PHP</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>PHP正则表达式简介</div>
+      <div>https://blog.supersource.top/regular_expression/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>看热闹的咸鱼</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2022年6月6日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/mysql_5_7_reset_password/" title="MySQL5.7忘记root密码如何重置">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">MySQL5.7忘记root密码如何重置</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  
+  
+    <article id="comments" lazyload>
+      
+  <div id="waline"></div>
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#waline', function() {
+      Fluid.utils.createCssLink('https://cdn.staticfile.org/waline/2.15.5/waline.min.css')
+      Fluid.utils.createScript('https://cdn.staticfile.org/waline/2.15.5/waline.min.js', function() {
+        var options = Object.assign(
+          {"serverURL":"https://blog-comment-black.vercel.app/","path":"window.location.pathname","meta":["nick","mail","link"],"requiredMeta":["nick"],"lang":"zh-CN","emoji":["https://cdn.jsdelivr.net/gh/walinejs/emojis/weibo"],"dark":"html[data-user-color-scheme=\"dark\"]","wordLimit":0,"pageSize":10},
+          {
+            el: '#waline',
+            path: window.location.pathname
+          }
+        )
+        Waline.init(options);
+        Fluid.utils.waitElementVisible('#waline .vcontent', () => {
+          var imgSelector = '#waline .vcontent img:not(.vemoji)';
+          Fluid.plugins.imageCaption(imgSelector);
+          Fluid.plugins.fancyBox(imgSelector);
+        })
+      });
+    });
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+    </article>
+  
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="leancloud-site-pv-container" style="display: none">
+        总访问量 
+        <span id="leancloud-site-pv"></span>
+         次
+      </span>
+    
+    
+      <span id="leancloud-site-uv-container" style="display: none">
+        总访客数 
+        <span id="leancloud-site-uv"></span>
+         人
+      </span>
+    
+    
+
+  
+</div>
+
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script defer src="/js/leancloud.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

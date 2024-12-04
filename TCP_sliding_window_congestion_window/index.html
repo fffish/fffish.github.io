@@ -1,0 +1,840 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/icon.jpg">
+  <link rel="icon" href="/img/icon.jpg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="看热闹的咸鱼">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="之前在讲解 TCP 的重传机制时提到过，TCP 每次发送数据，并不总是等到收到对方的 ACK 才继续发送下一条数据，而是会连接发送多个数据包。而这里能连接发送多少数据，则是由滑动窗口来控制的...">
+<meta property="og:type" content="article">
+<meta property="og:title" content="TCP的滑动窗口和拥塞控制">
+<meta property="og:url" content="https://blog.supersource.top/TCP_sliding_window_congestion_window/index.html">
+<meta property="og:site_name" content="每个人都有需要安静的时候">
+<meta property="og:description" content="之前在讲解 TCP 的重传机制时提到过，TCP 每次发送数据，并不总是等到收到对方的 ACK 才继续发送下一条数据，而是会连接发送多个数据包。而这里能连接发送多少数据，则是由滑动窗口来控制的...">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://blog.supersource.top/img/blog/tcp_swnd.png">
+<meta property="og:image" content="https://blog.supersource.top/img/blog/tcp_rwnd.png">
+<meta property="og:image" content="https://blog.supersource.top/img/blog/tcp_slide_window.png">
+<meta property="og:image" content="https://blog.supersource.top/img/blog/tcp_slow_start.png">
+<meta property="article:published_time" content="2024-06-04T02:11:35.000Z">
+<meta property="article:modified_time" content="2024-07-18T16:25:55.383Z">
+<meta property="article:author" content="看热闹的咸鱼">
+<meta property="article:tag" content="网络">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://blog.supersource.top/img/blog/tcp_swnd.png">
+  
+  
+  
+  <title>TCP的滑动窗口和拥塞控制 - 每个人都有需要安静的时候</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"blog.supersource.top","root":"/","version":"1.9.7","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"889KZdux1EO9gdRMRKsm6ERQ-MdYXbMMI","app_key":"YsMghHExWqBY3xXUBW4kt4An","server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+  
+
+  
+    <!-- Google tag (gtag.js) -->
+    <script async>
+      if (!Fluid.ctx.dnt) {
+        Fluid.utils.createScript("https://www.googletagmanager.com/gtag/js?id=", function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag() {
+            dataLayer.push(arguments);
+          }
+          gtag('js', new Date());
+          gtag('config', '');
+        });
+      }
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+  
+<meta name="generator" content="Hexo 5.4.2"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>L&amp;C</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/banner1.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="TCP的滑动窗口和拥塞控制"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2024-06-04 10:11" pubdate>
+          2024年6月4日 上午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          2k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          17 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="leancloud-page-views-container" class="post-meta" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="leancloud-page-views"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">TCP的滑动窗口和拥塞控制</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>当我们使用TCP，从客户端发送数据到服务器，这个过程会是怎样的呢？<br>
+首先，当然是耳熟能详的<a href="https://blog.supersource.top/the_three_way_handshake_of_TCP/">三次握手过程</a>，那当连接建立之后，就一股脑发送所有数据吗？<br>
+当然不是，一下子发送太多数据，接收端可能没有那么大的空间，就浪费了流量。<br>
+TCP使用<strong>滑动窗口</strong>来管理发送方和接收方之间的数据传输量。滑动窗口通过控制未确认数据包的数量，确保发送方发出的包不会超出接收方的处理能力。</p>
+<h3 id="滑动窗口">滑动窗口</h3>
+<p>滑动窗口的工作机制如下：</p>
+<ul>
+<li>TCP在每个ACK包中，通知对方自己目前能接收多少数据，即TCP头部中的<strong>窗口大小</strong>(三次握手期间的ACK也会包含窗口大小)。</li>
+<li>发送方可以在这个<strong>窗口大小</strong>内，<strong>连续</strong>发送多个数据包，而不必等待每个数据包的确认。</li>
+<li>当发送方收到接收方的<code>ACK</code>确认，窗口就会向前滑动，允许发送方继续发送新的数据包。</li>
+</ul>
+<p>在某个时间段，发送方的TCP数据流如下图所示，可以分成4个部分：<br>
+<img src="/img/blog/tcp_swnd.png" srcset="/img/loading.gif" lazyload alt="image"></p>
+<ul>
+<li>已发送且已确认的数据：这部分数据已经没用了，不再需要保存。</li>
+<li>已发送但未确认的数据：需要保存在缓冲区里，如果丢包了，可以进行重传。</li>
+<li>未发送，允许发送的数据：没有超过接收方缓冲区，可以发送数据。</li>
+<li>未发送，不允许发送的数据：超过对方缓冲区，不可以发送。</li>
+</ul>
+<p>滑动窗口的优点：</p>
+<ul>
+<li>高效利用带宽：滑动窗口允许发送方连续发送多个数据包，而无需等待每个数据包的确认，从而提高了带宽利用率。</li>
+<li>流量控制：通过动态调整窗口大小，滑动窗口机制能有效控制数据流量，防止网络拥堵。</li>
+</ul>
+<h3 id="窗口满的情况">窗口满的情况</h3>
+<p>在接收方看来，数据可以分成三个部分：</p>
+<ul>
+<li>成功接收并确认的数据</li>
+<li>未收到但可以接收的数据</li>
+<li>未收到且不可接收的数据<br>
+<img src="/img/blog/tcp_rwnd.png" srcset="/img/loading.gif" lazyload alt="image"></li>
+</ul>
+<p>未收到但可以接收的部分，就是接收方的窗口大小。<br>
+接收方收到数据后，会存放到缓冲区中，等待上层应用获取数据(socket调用read函数)。<br>
+如果上层应用繁忙，读取效率较低，那么这个窗口就会慢慢变小，甚至会变成0，也就是窗口满的情况。<br>
+这时候，接收方会发送一个<code>ZeroWindow</code>的包，告诉发送方，这边已经不能再接收数据了，发送方就不再发送数据。<br>
+等到缓冲区的数据被读取之后，接收方会发一个<code>WindowUpdate</code>的ACK，告诉发送方自己最新的窗口大小，发送方就可以继续发送数据了。</p>
+<p>但是这里有个问题，如果这个<code>WindowUpdate</code>的包丢失了的话，发送方就只能继续保持0窗口，数据在这里就卡住不再发送了。<br>
+为了解决这个问题，TCP设置了定时探测，发送<code>ZeroWindowProbe</code>，获取接收端最新的窗口大小。<br>
+<img src="/img/blog/tcp_slide_window.png" srcset="/img/loading.gif" lazyload alt="image"></p>
+<blockquote>
+<p>TCP协议本身并没有一个明确的<code>Window Full</code>标记。然而，在实际使用中，有些网络监测工具和协议分析器（例如Wireshark）会标识或标记某些数据包，以表明发送方的发送窗口已经完全被使用。这种标记主要是用来帮助用户理解和分析TCP连接中的流量控制和拥塞控制情况。</p>
+</blockquote>
+<h3 id="糊涂窗口综合症">糊涂窗口综合症</h3>
+<p>当接收方缓冲区满时，窗口关闭，如果应用层读取了一个字节的数据，此时缓冲区就有了一个字节的空间，这时候立刻发送<code>WindowUpdate</code>通知发送方的话，那发送方就可能发一个字节的数据过来，一个TCP包只包含一个字节的数据，这效率就很低下。<br>
+这种情况下，这个连接的窗口一直保持在很小的状态，称作<code>糊涂窗口综合症</code>。<br>
+为了解决这个问题，当<code>窗口大小</code>小于<code>min(MSS，缓存空间/2)</code> ，也就是小于<code>MSS</code>与<code>1/2</code>缓存大小中的最小值时，就会向发送方通告窗口为 0，也就阻止了发送方再发数据过来。<br>
+等到接收方处理了一些数据后，窗口大小 &gt;= MSS，或者接收方缓存空间有一半可以使用，才更新窗口大小，让发送方发送数据过来。</p>
+<h3 id="拥塞控制">拥塞控制</h3>
+<p>滑动窗口控制的是一个TCP连接的流量，避免发送方的数据填满接收方的缓存。但是，网络上不只一个TCP连接，如果不加以控制的话，就可能发生数据的拥堵，拥堵导致丢包，丢包需要重传，则又加大了拥堵。<br>
+所以，TCP使用了<strong>拥塞控制</strong>来避免数据填满整个网络。</p>
+<p><strong>拥塞窗口 cwnd</strong> 是发送方维护的一个的状态变量，它会根据<strong>网络的拥塞程度动态变化的</strong> 。当<code>cwnd=n</code>时，表示发送方可以发送<code>n</code>个<code>MSS</code>大小的数据</p>
+<p>拥塞控制主要是四个算法：</p>
+<ul>
+<li>慢启动</li>
+<li>拥塞避免</li>
+<li>快速重传</li>
+<li>快速恢复</li>
+</ul>
+<h4 id="慢启动">慢启动</h4>
+<p>慢启动的思路就是，不要一开始就发送大量的数据，先探测一下网络的拥塞程度，也就是说由小到大逐渐增加<code>cwnd</code>的大小，其算法如下：</p>
+<ol>
+<li>建立连接后，初始化<code>cwnd</code>为<code>1</code>，可以发送1个<code>MSS</code>数据。</li>
+<li>每次收到<code>ACK</code>，则将<code>cwnd</code>加1。</li>
+<li><code>cwnd</code>达到某一个阈值<code>ssthresh</code>（slow start threshold）后，不再使用慢启动，改用<strong>拥塞避免</strong>算法。</li>
+</ol>
+<p><img src="/img/blog/tcp_slow_start.png" srcset="/img/loading.gif" lazyload alt="image"><br>
+从上图中，可以看到，每一个<code>rtt</code>时间，<code>cwnd</code>都会翻倍，从而快速地增长。在良好的网络环境下，可以很快达到阈值，进入<strong>拥塞避免</strong>算法。</p>
+<blockquote>
+<p>在一些现代操作系统中（如 Linux 和 Windows），TCP 初始拥塞窗口的默认值为 10 个 MSS。这使得发送方在建立连接后的初始数据传输中，可以一次发送多达 10 个 MSS 的数据包，而不必经历传统的慢启动阶段。</p>
+</blockquote>
+<h4 id="拥塞避免">拥塞避免</h4>
+<p>慢启动时，起点低，但指数增长，速度快，达到一定程度后，就不能再继续指数增长，以防止拥塞。拥塞避免的想法就是，在一个<code>rtt</code>时间内，让<code>cwnd</code>不是翻倍，而是加一，缓慢增长。<br>
+那么，如何让<code>cwnd</code>在一个<code>rtt</code>中加一呢？在<strong>慢启动</strong>算法中，在某一轮次，<code>cwnd=n</code>，此时连续发送<code>n</code>个<code>MSS</code>，每次收到<code>ACK</code>则<code>cwnd+1</code>，收到<code>n</code>个则<code>cwnd+n</code>，形成翻倍的效果。同理，只要在每次收到<code>ACK</code>时，将<code>cwnd+1</code>改成<code>cwnd+1/n</code>，那么在<code>n</code>个<code>ACK</code>后，则形成<code>cwnd+1</code>的结果。</p>
+<p>在慢启动和拥塞避免阶段，如果出现超时，则重发超时的数据，然后处理如下：</p>
+<ul>
+<li>将<code>ssthresh</code>设为<code>cwnd/2</code></li>
+<li>将<code>cwnd</code>设为1</li>
+<li>进入<strong>慢启动</strong>算法</li>
+</ul>
+<h4 id="快速重传">快速重传</h4>
+<p>当检测是否丢包时，每次都要等待超时的发生，会浪费很长时间，因此引入了<strong>快速重传</strong>：发送方只要收到3个重复的<code>ACK</code>，即认为丢包发生，此时会立即重传丢失的包，而不再等待超时的出现。</p>
+<h4 id="快速恢复">快速恢复</h4>
+<p>为了解决丢包后进入<strong>慢启动</strong>引起的效率降低，在<strong>快速重传</strong>的基础上，又引入了<strong>快速恢复</strong>，在发生快速重传之后，拥塞控制如下处理：</p>
+<ul>
+<li>将<code>ssthresh</code>设为<code>cwnd/2</code>。</li>
+<li>将<code>cwnd</code>设为<code>ssthresh+3</code>（+3是因为已经收到3个重复的ACK）。</li>
+<li>如果再收到重复的ACK，则<code>cwnd+1</code>。</li>
+<li>如果收到新的ACK，则快速恢复结束，进入<strong>拥塞避免</strong>。</li>
+</ul>
+<h3 id="参考资料">参考资料</h3>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/612561398">知乎 - 笔记：滑动窗口</a></li>
+</ul>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E7%BD%91%E7%BB%9C/" class="category-chain-item">网络</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E7%BD%91%E7%BB%9C/" class="print-no-link">#网络</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>TCP的滑动窗口和拥塞控制</div>
+      <div>https://blog.supersource.top/TCP_sliding_window_congestion_window/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>看热闹的咸鱼</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2024年6月4日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/windows_port_forward/" title="windows实现端口转发">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">windows实现端口转发</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/TCP_Nagle_and_Delayed_ACK/" title="TCP:Nagle算法和延迟确认">
+                        <span class="hidden-mobile">TCP:Nagle算法和延迟确认</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  
+  
+    <article id="comments" lazyload>
+      
+  <div id="waline"></div>
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#waline', function() {
+      Fluid.utils.createCssLink('https://cdn.staticfile.org/waline/2.15.5/waline.min.css')
+      Fluid.utils.createScript('https://cdn.staticfile.org/waline/2.15.5/waline.min.js', function() {
+        var options = Object.assign(
+          {"serverURL":"https://blog-comment-black.vercel.app/","path":"window.location.pathname","meta":["nick","mail","link"],"requiredMeta":["nick"],"lang":"zh-CN","emoji":["https://cdn.jsdelivr.net/gh/walinejs/emojis/weibo"],"dark":"html[data-user-color-scheme=\"dark\"]","wordLimit":0,"pageSize":10},
+          {
+            el: '#waline',
+            path: window.location.pathname
+          }
+        )
+        Waline.init(options);
+        Fluid.utils.waitElementVisible('#waline .vcontent', () => {
+          var imgSelector = '#waline .vcontent img:not(.vemoji)';
+          Fluid.plugins.imageCaption(imgSelector);
+          Fluid.plugins.fancyBox(imgSelector);
+        })
+      });
+    });
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+    </article>
+  
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="leancloud-site-pv-container" style="display: none">
+        总访问量 
+        <span id="leancloud-site-pv"></span>
+         次
+      </span>
+    
+    
+      <span id="leancloud-site-uv-container" style="display: none">
+        总访客数 
+        <span id="leancloud-site-uv"></span>
+         人
+      </span>
+    
+    
+
+  
+</div>
+
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script defer src="/js/leancloud.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
