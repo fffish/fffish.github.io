@@ -1,3 +1,4 @@
+https://blog.supersource.top/lambda_in_cpp/
 https://blog.supersource.top/MySQL_group_top_n/
 https://blog.supersource.top/redis_cluster_use_docker/
 https://blog.supersource.top/skip_list_in_redis/
@@ -27,6 +28,7 @@ https://blog.supersource.top/insertion_sort/
 https://blog.supersource.top/merge_sort/
 https://blog.supersource.top/mysql_5_7_reset_password/
 https://blog.supersource.top/
+https://blog.supersource.top/tags/C/
 https://blog.supersource.top/tags/MySQL/
 https://blog.supersource.top/tags/PHP/
 https://blog.supersource.top/tags/Redis/
@@ -37,6 +39,7 @@ https://blog.supersource.top/tags/skynet/
 https://blog.supersource.top/tags/lua/
 https://blog.supersource.top/tags/%E6%B8%B8%E6%88%8F%E5%BC%80%E5%8F%91/
 https://blog.supersource.top/tags/%E7%AE%97%E6%B3%95/
+https://blog.supersource.top/categories/C/
 https://blog.supersource.top/categories/MySQL/
 https://blog.supersource.top/categories/PHP/
 https://blog.supersource.top/categories/Redis/

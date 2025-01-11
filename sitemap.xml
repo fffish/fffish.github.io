@@ -2,6 +2,15 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://blog.supersource.top/lambda_in_cpp/</loc>
+    
+    <lastmod>2025-01-11</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>https://blog.supersource.top/MySQL_group_top_n/</loc>
     
     <lastmod>2024-12-02</lastmod>
@@ -256,78 +265,85 @@
 
   <url>
     <loc>https://blog.supersource.top/</loc>
-    <lastmod>2024-12-04</lastmod>
+    <lastmod>2025-01-11</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
 
   
   <url>
+    <loc>https://blog.supersource.top/tags/C/</loc>
+    <lastmod>2025-01-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
     <loc>https://blog.supersource.top/tags/MySQL/</loc>
-    <lastmod>2024-12-04</lastmod>
+    <lastmod>2025-01-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://blog.supersource.top/tags/PHP/</loc>
-    <lastmod>2024-12-04</lastmod>
+    <lastmod>2025-01-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://blog.supersource.top/tags/Redis/</loc>
-    <lastmod>2024-12-04</lastmod>
+    <lastmod>2025-01-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://blog.supersource.top/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/</loc>
-    <lastmod>2024-12-04</lastmod>
+    <lastmod>2025-01-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://blog.supersource.top/tags/%E7%BD%91%E7%BB%9C/</loc>
-    <lastmod>2024-12-04</lastmod>
+    <lastmod>2025-01-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://blog.supersource.top/tags/%E6%B8%B8%E6%88%8F%E6%9C%8D%E5%8A%A1%E5%99%A8/</loc>
-    <lastmod>2024-12-04</lastmod>
+    <lastmod>2025-01-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://blog.supersource.top/tags/skynet/</loc>
-    <lastmod>2024-12-04</lastmod>
+    <lastmod>2025-01-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://blog.supersource.top/tags/lua/</loc>
-    <lastmod>2024-12-04</lastmod>
+    <lastmod>2025-01-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://blog.supersource.top/tags/%E6%B8%B8%E6%88%8F%E5%BC%80%E5%8F%91/</loc>
-    <lastmod>2024-12-04</lastmod>
+    <lastmod>2025-01-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://blog.supersource.top/tags/%E7%AE%97%E6%B3%95/</loc>
-    <lastmod>2024-12-04</lastmod>
+    <lastmod>2025-01-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
@@ -335,43 +351,50 @@
 
   
   <url>
+    <loc>https://blog.supersource.top/categories/C/</loc>
+    <lastmod>2025-01-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
     <loc>https://blog.supersource.top/categories/MySQL/</loc>
-    <lastmod>2024-12-04</lastmod>
+    <lastmod>2025-01-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://blog.supersource.top/categories/PHP/</loc>
-    <lastmod>2024-12-04</lastmod>
+    <lastmod>2025-01-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://blog.supersource.top/categories/Redis/</loc>
-    <lastmod>2024-12-04</lastmod>
+    <lastmod>2025-01-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://blog.supersource.top/categories/%E7%BD%91%E7%BB%9C/</loc>
-    <lastmod>2024-12-04</lastmod>
+    <lastmod>2025-01-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://blog.supersource.top/categories/skynet/</loc>
-    <lastmod>2024-12-04</lastmod>
+    <lastmod>2025-01-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://blog.supersource.top/categories/%E7%AE%97%E6%B3%95/</loc>
-    <lastmod>2024-12-04</lastmod>
+    <lastmod>2025-01-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
